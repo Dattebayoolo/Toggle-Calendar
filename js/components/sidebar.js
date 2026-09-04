@@ -330,6 +330,67 @@
       const el = document.getElementById(id);
       if (el) el.textContent = text;
     });
+
+    /* ── Event modal: placeholders, select options, buttons ── */
+    const setPlaceholder = (id, en, ur) => {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = isUrdu ? (ur || en) : en;
+    };
+    setPlaceholder('eventTitle', "Add title or type 'Meet Tariq tomorrow 3pm for 1hr at Dolmen Mall'...", U.titlePlaceholder);
+    setPlaceholder('eventLocation', 'Add location or video call', U.addLocation);
+    setPlaceholder('eventDesc', 'Add notes', U.addNotes);
+    setPlaceholder('eventAttendees', 'Add attendees (phone or email)', U.addAttendees);
+
+    const setOptions = (selectId, map) => {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      [...sel.options].forEach(o => {
+        if (map[o.value]) o.textContent = isUrdu ? (map[o.value].ur || map[o.value].en) : map[o.value].en;
+      });
+    };
+    setOptions('eventRecurrence', {
+      none:    { en: 'Does not repeat', ur: U.doesNotRepeat },
+      daily:   { en: 'Daily',   ur: U.daily },
+      weekly:  { en: 'Weekly',  ur: U.weekly },
+      monthly: { en: 'Monthly', ur: U.monthly },
+      yearly:  { en: 'Yearly',  ur: U.yearly },
+    });
+    setOptions('eventCategory', {
+      work:      { en: 'Work / Meeting', ur: U.work },
+      personal:  { en: 'Personal',       ur: U.personal },
+      family:    { en: 'Family',         ur: U.family },
+      health:    { en: 'Health / Doctor',ur: U.health },
+      religious: { en: 'Religious',      ur: U.religious },
+      social:    { en: 'Social',         ur: U.social },
+    });
+    setOptions('eventReminder', {
+      none:  { en: 'No reminder',        ur: U.noReminder },
+      '5':   { en: '5 minutes before',   ur: `5 ${U.minBefore}` },
+      '15':  { en: '15 minutes before',  ur: `15 ${U.minBefore}` },
+      '30':  { en: '30 minutes before',  ur: `30 ${U.minBefore}` },
+      '60':  { en: '1 hour before',      ur: U.hourBefore },
+      '1440':{ en: '1 day before',       ur: U.dayBefore },
+    });
+
+    const untilSep = document.querySelector('.recurrence-until-wrap .dt-sep');
+    if (untilSep) untilSep.textContent = isUrdu ? (U.until || 'until') : 'until';
+
+    const nlpBtn = document.getElementById('nlpApplyBtn');
+    if (nlpBtn) nlpBtn.textContent = isUrdu ? (U.autoFill || 'Auto-fill') : 'Auto-fill';
+
+    const cancelBtn = document.getElementById('cancelEvent');
+    if (cancelBtn) cancelBtn.textContent = isUrdu ? (U.cancel || 'Cancel') : 'Cancel';
+    const saveBtn = document.getElementById('saveEvent');
+    if (saveBtn) saveBtn.textContent = isUrdu ? (U.save || 'Save') : 'Save';
+
+    // Modal title follows the current mode too (open modal keeps correct label)
+    const modalTitle = document.getElementById('modalTitle');
+    if (modalTitle && typeof Toggle._modalTitle === 'function') {
+      // Only re-label if a modal kind is active (tracked by modal.js state)
+      if (Toggle.state.editingId) {
+        modalTitle.textContent = Toggle._modalTitle(String(Toggle.state.editingId).includes('__occ__') ? 'editSeries' : 'edit');
+      }
+    }
   };
 
   /* ── Sync UI Controls with State ── */
