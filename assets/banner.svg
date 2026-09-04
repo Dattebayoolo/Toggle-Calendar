@@ -1,0 +1,55 @@
+<svg width="880" height="240" viewBox="0 0 880 240" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="Toggle Calendar banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="880" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#01411c"/>
+      <stop offset="50%" stop-color="#057a3e"/>
+      <stop offset="100%" stop-color="#0a0f1a"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <clipPath id="card"><rect x="60" y="52" width="136" height="128" rx="22"/></clipPath>
+    <mask id="moon">
+      <rect width="240" height="240" fill="black"/>
+      <circle cx="140" cy="116" r="30" fill="white"/>
+      <circle cx="152" cy="106" r="26" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Background -->
+  <rect width="880" height="240" rx="18" fill="url(#bg)"/>
+  <rect width="880" height="240" rx="18" fill="url(#shine)"/>
+  <circle cx="800" cy="30" r="90" fill="#ffffff" opacity="0.04"/>
+  <circle cx="70" cy="220" r="120" fill="#000000" opacity="0.15"/>
+
+  <!-- Logo card -->
+  <g clip-path="url(#card)">
+    <rect x="60" y="52" width="34" height="128" fill="#ffffff"/>
+    <rect x="94" y="52" width="102" height="128" fill="#01411c"/>
+    <rect x="60" y="52" width="136" height="128" fill="url(#shine)"/>
+    <circle cx="158" cy="116" r="30" fill="#ffffff" mask="url(#moon)"/>
+    <polygon points="163,88 166,97 175,97 168,103 171,112 163,106 155,112 158,103 151,97 160,97" fill="#ffffff"/>
+  </g>
+  <rect x="60" y="52" width="136" height="128" rx="22" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+  <rect x="94" y="38" width="12" height="26" rx="6" fill="url(#metal)"/>
+  <rect x="150" y="38" width="12" height="26" rx="6" fill="url(#metal)"/>
+
+  <!-- Title -->
+  <text x="236" y="112" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="52" font-weight="800" fill="#ffffff">Toggle Calendar</text>
+  <text x="240" y="152" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="21" font-weight="400" fill="#a7f3d0">Pakistan's first culturally-aware scheduling platform</text>
+
+  <!-- Tagline chips -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600">
+    <rect x="240" y="176" width="120" height="30" rx="15" fill="rgba(255,255,255,0.12)"/>
+    <text x="300" y="196" fill="#ffffff" text-anchor="middle">🌙 Hijri</text>
+    <rect x="372" y="176" width="140" height="30" rx="15" fill="rgba(255,255,255,0.12)"/>
+    <text x="442" y="196" fill="#ffffff" text-anchor="middle">🕌 Prayer Times</text>
+    <rect x="524" y="176" width="180" height="30" rx="15" fill="rgba(255,255,255,0.12)"/>
+    <text x="614" y="196" fill="#ffffff" text-anchor="middle">🤲 Jummah Protection</text>
+  </g>
+</svg>

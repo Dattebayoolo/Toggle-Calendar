@@ -1,0 +1,36 @@
+{
+  "name": "Toggle Calendar — Pakistan's Smart Calendar",
+  "short_name": "Toggle Cal",
+  "description": "Pakistan's first culturally-aware scheduling platform with Hijri dates, prayer times, and Jummah protection.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0f1a",
+  "theme_color": "#01411c",
+  "orientation": "any",
+  "lang": "en-PK",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "New Event",
+      "short_name": "New",
+      "description": "Create a new calendar event",
+      "url": "./index.html?action=new",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
