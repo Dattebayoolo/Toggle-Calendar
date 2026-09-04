@@ -91,6 +91,20 @@
   };
 
   Toggle.initApp = function() {
+    // Global error surface: without this, one thrown error silently kills
+    // every listener registered after it and the user sees nothing.
+    window.addEventListener('error', e => {
+      console.error('[Toggle]', e.message, e.filename ? `(${e.filename.split('/').pop()}:${e.lineno})` : '');
+      try {
+        if (Toggle.popover && typeof Toggle.popover.showToast === 'function') {
+          Toggle.popover.showToast('⚠️ Something went wrong — please reload the page');
+        }
+      } catch { /* toast itself failed — nothing more we can do */ }
+    });
+    window.addEventListener('unhandledrejection', e => {
+      console.error('[Toggle] Unhandled promise rejection:', e.reason);
+    });
+
     // Register Service Worker for PWA (Pillar 1)
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
       navigator.serviceWorker.register('./sw.js').catch(err => {
@@ -104,15 +118,6 @@
     if (Toggle.listeners && typeof Toggle.listeners.initListeners === 'function') Toggle.listeners.initListeners();
     if (Toggle.sidebar && typeof Toggle.sidebar.startClock === 'function') Toggle.sidebar.startClock();
     if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
-
-    // PWA: register the service worker (offline-first + install prompt).
-    // Only over HTTP(S) — file:// has no service worker support.
-    if ('serviceWorker' in navigator &&
-        (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-      navigator.serviceWorker.register('sw.js').catch(err => {
-        console.warn('[Toggle] Service worker registration failed:', err);
-      });
-    }
   };
 
   if (document.readyState === 'loading') {

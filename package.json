@@ -1,0 +1,12 @@
+{
+  "name": "toggle-calendar",
+  "version": "0.3.0",
+  "description": "Pakistan's first culturally-aware scheduling platform with Hijri dates, prayer times, and Jummah protection.",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/router.mjs",
+    "start": "node scripts/router.mjs",
+    "test": "node scripts/check.mjs"
+  },
+  "license": "MIT"
+}

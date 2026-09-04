@@ -4,7 +4,7 @@
  * Caches all core app assets on install, serves from cache on fetch.
  */
 
-const CACHE_NAME = 'toggle-cal-v0.2.1';
+const CACHE_NAME = 'toggle-cal-v0.3.0';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,9 @@ const CORE_ASSETS = [
   './icons/icon-192.svg',
   './icons/icon-512.svg',
   './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
   './js/constants.js',
   './js/state.js',
   './js/utils.js',
@@ -47,7 +50,10 @@ self.addEventListener('activate', event => {
   );
 });
 
-/* ── Fetch: cache-first, network fallback ── */
+/* ── Fetch: network-first for the app shell, cache-first for assets ──
+   index.html is network-first so users always get the latest release
+   without waiting for a CACHE_NAME bump; hashed/immutable assets are
+   cache-first for speed. */
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
@@ -71,9 +77,26 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Same-origin only for the cache-first strategy
+  // Same-origin only beyond this point
   if (url.origin !== self.location.origin) return;
 
+  // Navigations (index.html): try network first, fall back to cache offline
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() =>
+        caches.match('./index.html').then(cached => cached || Response.error())
+      )
+    );
+    return;
+  }
+
+  // Everything else: cache-first, network fallback
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
@@ -85,10 +108,8 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() => {
-        // Offline fallback for navigation requests — serve index.html
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
+        // Offline fallback for asset requests — serve the shell
+        return caches.match('./index.html');
       });
     })
   );

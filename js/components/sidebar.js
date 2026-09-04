@@ -123,25 +123,34 @@
 
     const state = Toggle.state || {};
     const utils = Toggle.utils || {};
+    const isUrdu = state.lang === 'ur';
+    const U = Toggle.URDU || {};
     const pills = [];
 
     if (state.showJummah) {
-      pills.push(`<span class="status-pill green" title="Friday meetings blocked 12:45–2:30 PM"><span class="status-dot"></span><span class="material-icons-round pill-icon">mosque</span>Jummah Protected</span>`);
+      pills.push(`<span class="status-pill green" title="Friday meetings blocked 12:45–2:30 PM"><span class="status-dot"></span><span class="material-icons-round pill-icon">mosque</span>${isUrdu ? 'جمعہ محفوظ' : 'Jummah Protected'}</span>`);
     }
     if (state.showHijri) {
-      pills.push(`<span class="status-pill blue" title="Dual Gregorian and Umm al-Qura Hijri dates active"><span class="status-dot"></span><span class="material-icons-round pill-icon">bedtime</span>Hijri Dual-Sync</span>`);
+      pills.push(`<span class="status-pill blue" title="Dual Gregorian and Umm al-Qura Hijri dates active"><span class="status-dot"></span><span class="material-icons-round pill-icon">bedtime</span>${isUrdu ? 'ہجری ڈوئل سنک' : 'Hijri Dual-Sync'}</span>`);
     }
     if (state.showPrayer && utils.getNextPrayer) {
       const nextP = utils.getNextPrayer(state.city || 'karachi');
       if (nextP) {
-        pills.push(`<span class="status-pill green" title="Next prayer window in ${state.city || 'Karachi'}"><span class="status-dot"></span><span class="material-icons-round pill-icon">schedule</span>${nextP.label}</span>`);
+        let label = nextP.label;
+        if (isUrdu) {
+          const h = Math.floor(nextP.diffMinutes / 60);
+          const m = nextP.diffMinutes % 60;
+          const pName = (U.prayers && U.prayers[nextP.name]) || nextP.name;
+          label = `${pName} میں ${h > 0 ? h + ' گھنٹے ' : ''}${m} منٹ`;
+        }
+        pills.push(`<span class="status-pill green" title="Next prayer window in ${state.city || 'Karachi'}"><span class="status-dot"></span><span class="material-icons-round pill-icon">schedule</span>${label}</span>`);
       }
     }
     if (state.showRamadan) {
-      pills.push(`<span class="status-pill amber" title="Working hours shifted to 8:00 AM – 2:00 PM"><span class="status-dot"></span><span class="material-icons-round pill-icon">wb_sunny</span>Ramadan Mode</span>`);
+      pills.push(`<span class="status-pill amber" title="Working hours shifted to 8:00 AM – 2:00 PM"><span class="status-dot"></span><span class="material-icons-round pill-icon">wb_sunny</span>${isUrdu ? U.ramadanMode : 'Ramadan Mode'}</span>`);
     }
     if (state.showLoadShedding) {
-      pills.push(`<span class="status-pill red" title="Load shedding windows monitored"><span class="status-dot"></span><span class="material-icons-round pill-icon">flash_off</span>Outage Monitored</span>`);
+      pills.push(`<span class="status-pill red" title="Load shedding windows monitored"><span class="status-dot"></span><span class="material-icons-round pill-icon">flash_off</span>${isUrdu ? U.loadShedding : 'Outage Monitored'}</span>`);
     }
     if (state.moonOffset !== 0) {
       pills.push(`<span class="status-pill purple" title="Ruet-e-Hilal lunar adjustment"><span class="status-dot"></span>Ruet ${state.moonOffset > 0 ? '+' : ''}${state.moonOffset}d</span>`);
@@ -154,9 +163,15 @@
   sidebar.renderTopBar = function() {
     const state = Toggle.state || {};
     const m = state.current || new Date();
+    const isUrdu = state.lang === 'ur';
+    const U = Toggle.URDU || {};
     const monthTitle = document.getElementById('monthTitle');
     if (monthTitle) {
-      monthTitle.textContent = m.toLocaleDateString('en-PK', { month: 'long', year: 'numeric' });
+      if (isUrdu && U.months) {
+        monthTitle.textContent = `${U.months[m.getMonth()]} ${m.getFullYear()}`;
+      } else {
+        monthTitle.textContent = m.toLocaleDateString('en-PK', { month: 'long', year: 'numeric' });
+      }
     }
 
     const hijriSubtitle = document.getElementById('hijriSubtitle');

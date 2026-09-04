@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toggle Calendar — Pakistan's First Culturally-Aware Smart Calendar</title>
+  <meta name="description" content="Toggle Calendar is Pakistan's first culturally-aware scheduling platform with Hijri dates, astronomical prayer times, Jummah protection, Ramadan mode, Roman Urdu NLP, and 100% offline privacy." />
+  <meta name="keywords" content="Pakistan calendar, Hijri calendar, prayer times Karachi Lahore Islamabad, Jummah protection, Ramadan timings, Roman Urdu calendar, offline PWA" />
+  
+  <meta name="theme-color" content="#01411c" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Fonts & Icons (Identical to app) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+
+  <!-- Stylesheets: App Core Design System first, then Landing page layout -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="landing.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       STICKY NAVIGATION BAR (Consistent with App Topbar)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <header class="landing-nav">
+    <div class="landing-container landing-nav-inner">
+      <!-- Brand Logo -->
+      <a href="landing.html" class="brand-link" aria-label="Toggle Calendar Home">
+        <div class="brand-icon">
+          <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pkFlagGreen" x1="8" y1="2" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#057a3e"/>
+                <stop offset="55%" stop-color="#01411c"/>
+                <stop offset="100%" stop-color="#002b12"/>
+              </linearGradient>
+              <clipPath id="calCardClip">
+                <rect x="2" y="4" width="32" height="29" rx="7.5"/>
+              </clipPath>
+              <mask id="pkMoonMask">
+                <rect width="36" height="36" fill="black"/>
+                <circle cx="21" cy="18" r="6.2" fill="white"/>
+                <circle cx="23.3" cy="16.1" r="5.3" fill="black"/>
+              </mask>
+              <linearGradient id="metalRing" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#94a3b8"/>
+              </linearGradient>
+            </defs>
+            <rect x="7.8" y="1.2" width="3" height="5.6" rx="1.5" fill="url(#metalRing)"/>
+            <rect x="25.2" y="1.2" width="3" height="5.6" rx="1.5" fill="url(#metalRing)"/>
+            <g clip-path="url(#calCardClip)">
+              <rect x="2" y="4" width="32" height="29" fill="url(#pkFlagGreen)"/>
+              <rect x="2" y="4" width="8" height="29" fill="#ffffff"/>
+              <line x1="10" y1="4" x2="10" y2="33" stroke="rgba(0,0,0,0.12)" stroke-width="0.75"/>
+              <line x1="2" y1="10.5" x2="34" y2="10.5" stroke="rgba(255,255,255,0.2)" stroke-width="0.75"/>
+              <circle cx="21" cy="18" r="6.2" fill="#ffffff" mask="url(#pkMoonMask)"/>
+              <g transform="translate(24.2, 14.1) rotate(-35)">
+                <polygon points="0,-2.6 0.75,-0.8 2.5,-0.8 1.1,0.3 1.6,2.1 0,1.1 -1.6,2.1 -1.1,0.3 -2.5,-0.8 -0.75,-0.8" fill="#ffffff"/>
+              </g>
+              <rect x="15.5" y="25" width="14.5" height="5" rx="2.5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="0.6"/>
+              <circle cx="26" cy="27.5" r="2" fill="#ffffff"/>
+            </g>
+          </svg>
+        </div>
+        <span class="brand-name">Toggle Calendar</span>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="landing-nav-links">
+        <a href="#features">Features</a>
+        <a href="#why-pakistan">Why Pakistan?</a>
+        <a href="#sandbox">Live Demo</a>
+        <a href="#cities">11 Cities</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+
+      <!-- Topbar Actions -->
+      <div class="landing-nav-actions">
+        <!-- Theme Switcher (Uses identical icon-btn class from app) -->
+        <button class="icon-btn" id="themeToggleBtn" aria-label="Toggle light or dark theme" title="Toggle Theme">
+          <span class="material-icons-round icon-mode">light_mode</span>
+        </button>
+
+        <!-- Direct Launch App Button -->
+        <a href="index.html" class="goog-btn-filled" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          <span>Open Calendar</span>
+          <span class="material-icons-round" style="font-size:16px;">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       HERO SECTION
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-hero">
+    <div class="landing-container">
+      <div class="hero-header">
+        <div class="hero-eyebrow">
+          <span class="pulse-dot"></span>
+          <span>Pakistan's First Culturally-Aware Scheduling Platform</span>
+        </div>
+
+        <h1 class="hero-title">
+          Never Miss a <span class="text-emerald">Prayer</span>, a Meeting, or a <span class="text-emerald">Roza</span>.
+        </h1>
+
+        <p class="hero-subtitle">
+          Built from the ground up for Pakistan. Dual Hijri-Gregorian dates, astronomical prayer times across 11 cities, automated Jummah conflict protection, Ramadan mode, and natural Roman Urdu input. 100% private and offline-first.
+        </p>
+
+        <div class="hero-actions">
+          <a href="index.html" class="btn-hero-launch" id="btnLaunchHero">
+            <span class="material-icons-round">rocket_launch</span>
+            <span>Launch Toggle Calendar Free</span>
+          </a>
+          <a href="#sandbox" class="btn-hero-sandbox">
+            <span class="material-icons-round">play_arrow</span>
+            <span>Try Interactive Sandbox</span>
+          </a>
+        </div>
+
+        <div class="hero-trust-bar">
+          <div class="hero-trust-item">
+            <span class="material-icons-round">verified</span>
+            <span>No Signup Required</span>
+          </div>
+          <div class="hero-trust-item">
+            <span class="material-icons-round">lock</span>
+            <span>100% Client-Side LocalStorage</span>
+          </div>
+          <div class="hero-trust-item">
+            <span class="material-icons-round">wifi_off</span>
+            <span>Works Fully Offline (PWA)</span>
+          </div>
+          <div class="hero-trust-item">
+            <span class="material-icons-round">location_city</span>
+            <span>11 Pakistani Cities</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Interactive App Replica Showcase ── -->
+      <div class="app-window-frame">
+        <!-- Desktop Window Chrome -->
+        <div class="window-chrome">
+          <div class="window-dots">
+            <span class="window-dot red"></span>
+            <span class="window-dot yellow"></span>
+            <span class="window-dot green"></span>
+          </div>
+          <div class="window-url-bar">
+            <span class="material-icons-round">lock</span>
+            <span>togglecalendar.pk/app</span>
+          </div>
+          <div style="width:48px;"></div>
+        </div>
+
+        <!-- Real App Window Interior -->
+        <div class="window-app-shell">
+          <!-- Mini Sidebar Replica -->
+          <aside class="mockup-sidebar">
+            <div class="mockup-fab">
+              <span class="material-icons-round">add</span>
+              <span>New event</span>
+            </div>
+
+            <!-- Pakistani Cultural Toggles (Interactive!) -->
+            <div class="mockup-toggles-box">
+              <div class="mockup-toggle-row">
+                <div class="mockup-toggle-label">
+                  <span class="mockup-toggle-title">Jummah Guard</span>
+                  <span class="mockup-toggle-sub">Block Fri 12:45–2:30 PM</span>
+                </div>
+                <label class="goog-switch">
+                  <input type="checkbox" id="mockupSwJummah" checked>
+                  <span class="goog-track"><span class="goog-thumb"></span></span>
+                </label>
+              </div>
+
+              <div class="mockup-toggle-row">
+                <div class="mockup-toggle-label">
+                  <span class="mockup-toggle-title">Ramadan Mode</span>
+                  <span class="mockup-toggle-sub">Sehri & Iftar tracking</span>
+                </div>
+                <label class="goog-switch">
+                  <input type="checkbox" id="mockupSwRamadan" checked>
+                  <span class="goog-track amber"><span class="goog-thumb"></span></span>
+                </label>
+              </div>
+
+              <div class="mockup-toggle-row">
+                <div class="mockup-toggle-label">
+                  <span class="mockup-toggle-title">Load Shedding</span>
+                  <span class="mockup-toggle-sub">Feeder outage alert</span>
+                </div>
+                <label class="goog-switch">
+                  <input type="checkbox" id="mockupSwLoadshed">
+                  <span class="goog-track red"><span class="goog-thumb"></span></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mini Solar Prayer Ribbon -->
+            <div class="mockup-prayer-box">
+              <div class="mockup-prayer-hdr">
+                <span>🕌 Prayer Times (Karachi)</span>
+              </div>
+              <div class="prayer-list">
+                <div class="prayer-row">
+                  <span class="prayer-name"><span class="prayer-dot"></span>Fajr</span>
+                  <span class="prayer-time" id="mockupFajr">04:58 AM</span>
+                </div>
+                <div class="prayer-row">
+                  <span class="prayer-name"><span class="prayer-dot"></span>Dhuhr</span>
+                  <span class="prayer-time" id="mockupDhuhr">12:35 PM</span>
+                </div>
+                <div class="prayer-row active">
+                  <span class="prayer-name"><span class="prayer-dot"></span>Asr</span>
+                  <div class="prayer-time-wrap">
+                    <span class="prayer-active-tag">Next</span>
+                    <span class="prayer-time" id="mockupAsr">04:55 PM</span>
+                  </div>
+                </div>
+                <div class="prayer-row">
+                  <span class="prayer-name"><span class="prayer-dot"></span>Maghrib</span>
+                  <span class="prayer-time" id="mockupMaghrib">06:48 PM</span>
+                </div>
+                <div class="prayer-row">
+                  <span class="prayer-name"><span class="prayer-dot"></span>Isha</span>
+                  <span class="prayer-time" id="mockupIsha">08:08 PM</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Main Calendar Board Replica -->
+          <div class="mockup-main">
+            <div class="mockup-topbar">
+              <div class="mockup-date-title">
+                <span id="mockupGregDate">Friday, Sep 4, 2026</span>
+                <span class="hijri-tag" id="mockupHijriDate">19 Safar 1448 AH</span>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;">
+                <!-- Ruet Adjuster Segmented Control -->
+                <div class="moon-adjuster-wrap" title="Ruet-e-Hilal lunar adjustment">
+                  <span class="moon-badge-label">
+                    <span class="material-icons-round">bedtime</span>
+                    <span>Ruet</span>
+                  </span>
+                  <div class="chip-group" id="mockupRuetGroup">
+                    <button class="chip active" data-offset="0">Auto</button>
+                    <button class="chip" data-offset="-1">−1d</button>
+                    <button class="chip" data-offset="1">+1d</button>
+                  </div>
+                </div>
+
+                <!-- View Switcher -->
+                <div class="chip-group" id="mockupViewGroup">
+                  <button class="chip active">Day</button>
+                  <button class="chip">Week</button>
+                  <button class="chip">Month</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Context Status Bar -->
+            <div class="feature-bar" style="border-top:none;">
+              <div class="feature-pills">
+                <span class="status-pill green">
+                  <span class="material-icons-round pill-icon">verified_user</span>
+                  <span>Jummah Guard Active</span>
+                </span>
+                <span class="status-pill amber">
+                  <span class="material-icons-round pill-icon">wb_sunny</span>
+                  <span>Ramadan Roza Mode</span>
+                </span>
+              </div>
+              <div class="clock-chip">
+                <span class="clock-flag">🇵🇰</span>
+                <span class="clock-tz">Asia/Karachi</span>
+              </div>
+            </div>
+
+            <!-- Calendar Event Schedule Area -->
+            <div class="mockup-grid">
+              <!-- Jummah Protected Banner -->
+              <div class="mockup-event-banner jummah" id="mockupEventJummah">
+                <div class="event-banner-left">
+                  <span class="event-banner-time">12:45 PM – 2:30 PM</span>
+                  <div class="event-banner-info">
+                    <h5>Jummah Mubarak (Congregational Prayer)</h5>
+                    <p>Protected prayer buffer · Automatic meeting clash prevention</p>
+                  </div>
+                </div>
+                <span class="status-pill green" style="background:#fff;">Blocked</span>
+              </div>
+
+              <!-- Safe Meeting After Jummah -->
+              <div class="mockup-event-banner meeting">
+                <div class="event-banner-left">
+                  <span class="event-banner-time">3:30 PM – 4:15 PM</span>
+                  <div class="event-banner-info">
+                    <h5>Client Sprint Review with Hamza</h5>
+                    <p>Dolmen City, Clifton · Safe post-Jummah schedule</p>
+                  </div>
+                </div>
+                <span class="status-pill blue" style="background:#fff;">Safe Slot</span>
+              </div>
+
+              <!-- Ramadan Iftar Banner -->
+              <div class="mockup-event-banner ramadan" id="mockupEventRamadan">
+                <div class="event-banner-left">
+                  <span class="event-banner-time">6:48 PM</span>
+                  <div class="event-banner-info">
+                    <h5>🌅 Iftar Dastarkhwan (Sunset)</h5>
+                    <p>Roza fast completed · Evening prayer break</p>
+                  </div>
+                </div>
+                <span class="status-pill amber" style="background:#fff;">Iftar Time</span>
+              </div>
+
+              <!-- Feeder Load Shedding Alert -->
+              <div class="mockup-event-banner loadshed" id="mockupEventLoadshed" style="display:none;">
+                <div class="event-banner-left">
+                  <span class="event-banner-time">10:00 AM – 11:30 AM</span>
+                  <div class="event-banner-info">
+                    <h5>⚡ K-Electric Feeder 4 Outage Window</h5>
+                    <p>Scheduled maintenance · Plan offline activities</p>
+                  </div>
+                </div>
+                <span class="status-pill red" style="background:#fff;">Power Off</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       "WHY PAKISTAN?" (COMPARISON)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section alt-bg" id="why-pakistan">
+    <div class="landing-container">
+      <div class="section-head-center">
+        <span class="section-pill-tag">The Cultural Gap</span>
+        <h2 class="section-head-title">Built for Silicon Valley, Not for Pakistan</h2>
+        <p class="section-head-desc">
+          Western calendars treat all days identically as 9-to-5 slots. In Pakistan, schedules revolve around congregational prayers, lunar sightings, and local infrastructure realities.
+        </p>
+      </div>
+
+      <div class="comparison-grid">
+        <!-- Western Calendars -->
+        <div class="comp-card western">
+          <div class="comp-header">
+            <span class="material-icons-round" style="color:var(--red);font-size:24px;">cancel</span>
+            <h3>Google, Apple & Outlook</h3>
+          </div>
+          <ul class="comp-items">
+            <li class="comp-item">
+              <span class="material-icons-round">close</span>
+              <div class="comp-item-content">
+                <h4>Blind to Friday Jummah</h4>
+                <p>Happily books meetings at 1:15 PM on Friday, forcing awkward declines or missed prayers.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">close</span>
+              <div class="comp-item-content">
+                <h4>Static, Unadjusted Lunar Math</h4>
+                <p>Hijri dates are off by 1–2 days because they ignore Central Ruet-e-Hilal moon sighting announcements.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">close</span>
+              <div class="comp-item-content">
+                <h4>Clueless About Ramadan Routine</h4>
+                <p>No knowledge of shifted 8 AM – 2 PM office hours or daily Sehri and Iftar deadlines.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">close</span>
+              <div class="comp-item-content">
+                <h4>English-Only & Cloud Tracked</h4>
+                <p>Cannot parse "kal shaam 5 baje", while storing your private schedule on foreign advertising servers.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Toggle Calendar -->
+        <div class="comp-card toggle">
+          <div class="comp-header">
+            <span class="material-icons-round" style="color:var(--green);font-size:24px;">check_circle</span>
+            <h3>Toggle Calendar 🇵🇰</h3>
+          </div>
+          <ul class="comp-items">
+            <li class="comp-item">
+              <span class="material-icons-round">check</span>
+              <div class="comp-item-content">
+                <h4>Automated Jummah Guard</h4>
+                <p>Flags clashes between 12:45 PM and 2:30 PM on Fridays with a 1-click auto-shift buffer to 3:00 PM.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">check</span>
+              <div class="comp-item-content">
+                <h4>1-Click Ruet-e-Hilal Sync</h4>
+                <p>Dual Gregorian and Islamic dates on every cell, with instant ±1 day moon sighting adjustment.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">check</span>
+              <div class="comp-item-content">
+                <h4>Ramadan Mode & Load Shedding</h4>
+                <p>Live countdowns for Sehri and Iftar, daily dua banners, and feeder blackout overlays.</p>
+              </div>
+            </li>
+            <li class="comp-item">
+              <span class="material-icons-round">check</span>
+              <div class="comp-item-content">
+                <h4>Roman Urdu NLP + 100% Privacy</h4>
+                <p>Type naturally in Roman Urdu. Operates 100% offline in browser localStorage with zero tracking.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       INTERACTIVE SANDBOX
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section" id="sandbox">
+    <div class="landing-container">
+      <div class="section-head-center">
+        <span class="section-pill-tag">Live Playground</span>
+        <h2 class="section-head-title">Experience the Cultural Intelligence</h2>
+        <p class="section-head-desc">
+          Test our Roman Urdu natural language processor or view live astronomical solar prayer calculations across 11 Pakistani cities.
+        </p>
+      </div>
+
+      <div class="playground-card">
+        <!-- Tab Controls -->
+        <div class="playground-tabs">
+          <button class="playground-tab-btn active" data-target="tabNLP">
+            <span class="material-icons-round" style="font-size:16px;">edit_note</span>
+            <span>Roman Urdu & English NLP</span>
+          </button>
+          <button class="playground-tab-btn" data-target="tabPrayers">
+            <span class="material-icons-round" style="font-size:16px;">schedule</span>
+            <span>11 Cities Solar Prayers</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: NLP Parser -->
+        <div class="tab-panel active" id="tabNLP">
+          <div class="nlp-box-layout">
+            <div class="nlp-input-column">
+              <label class="nlp-input-label" for="nlpInputField">Type or edit an event phrase:</label>
+              <div class="search-bar" style="margin:0;max-width:100%;">
+                <span class="material-icons-round search-icon">psychology</span>
+                <input
+                  type="text"
+                  id="nlpInputField"
+                  class="search-input"
+                  placeholder="e.g. Chai with Hamza kal shaam 5 baje at Gloria Jeans"
+                  value="Chai with Hamza kal shaam 5 baje at Gloria Jeans"
+                />
+              </div>
+
+              <!-- Presets -->
+              <div class="nlp-presets-row" id="nlpPresets">
+                <button class="nlp-preset-btn" data-prompt="Client meeting Friday 1:15 pm (Jummah Clash)">Friday 1:15 pm (Jummah Clash)</button>
+                <button class="nlp-preset-btn" data-prompt="Chai with Hamza kal shaam 5 baje at Gloria Jeans">Chai with Hamza kal shaam 5 baje</button>
+                <button class="nlp-preset-btn" data-prompt="Doctor checkup parson dopahar 2 baje">Doctor checkup parson dopahar 2 baje</button>
+                <button class="nlp-preset-btn" data-prompt="Daily standup subah 10 baje">Daily standup subah 10 baje</button>
+              </div>
+            </div>
+
+            <div class="nlp-results-card">
+              <div class="nlp-res-title">
+                <span class="material-icons-round" style="font-size:16px;color:var(--green);">verified</span>
+                <span>Real-Time Parser Output</span>
+              </div>
+              <div class="nlp-res-rows">
+                <div class="nlp-res-row">
+                  <span class="nlp-res-lbl">Event Title</span>
+                  <span class="nlp-res-val" id="nlpOutTitle">Chai With Hamza</span>
+                </div>
+                <div class="nlp-res-row">
+                  <span class="nlp-res-lbl">Scheduled Date</span>
+                  <span class="nlp-res-val" id="nlpOutDate">Tomorrow</span>
+                </div>
+                <div class="nlp-res-row">
+                  <span class="nlp-res-lbl">Time</span>
+                  <span class="nlp-res-val" id="nlpOutTime">5:00 PM</span>
+                </div>
+                <div class="nlp-res-row">
+                  <span class="nlp-res-lbl">Status</span>
+                  <span class="nlp-res-val" id="nlpOutStatus" style="color:var(--green);">✅ Verified: No Jummah or Prayer Clash</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 11 Cities Solar Prayers -->
+        <div class="tab-panel" id="tabPrayers">
+          <div class="chip-group" id="cityPillsGroup" style="flex-wrap:wrap;padding:6px;gap:4px;">
+            <button class="chip active" data-city="karachi">Karachi</button>
+            <button class="chip" data-city="lahore">Lahore</button>
+            <button class="chip" data-city="islamabad">Islamabad</button>
+            <button class="chip" data-city="rawalpindi">Rawalpindi</button>
+            <button class="chip" data-city="peshawar">Peshawar</button>
+            <button class="chip" data-city="quetta">Quetta</button>
+            <button class="chip" data-city="multan">Multan</button>
+            <button class="chip" data-city="faisalabad">Faisalabad</button>
+            <button class="chip" data-city="sialkot">Sialkot</button>
+            <button class="chip" data-city="hyderabad">Hyderabad</button>
+            <button class="chip" data-city="gilgit">Gilgit</button>
+          </div>
+
+          <div style="font-size:0.92rem;font-weight:700;color:var(--t1);margin-top:16px;" id="prayerCityName">
+            Karachi, Pakistan — Astronomical Solar Calculations
+          </div>
+
+          <div class="prayer-explorer-cards">
+            <div class="prayer-tile">
+              <div class="prayer-tile-name">Fajr</div>
+              <div class="prayer-tile-time" id="tileFajr">04:58 AM</div>
+            </div>
+            <div class="prayer-tile">
+              <div class="prayer-tile-name">Dhuhr</div>
+              <div class="prayer-tile-time" id="tileDhuhr">12:35 PM</div>
+            </div>
+            <div class="prayer-tile" style="border-color:var(--green);background:var(--green-l);">
+              <div class="prayer-tile-name" style="color:var(--green);">Asr (Hanafi)</div>
+              <div class="prayer-tile-time" id="tileAsr" style="color:var(--green);">04:55 PM</div>
+            </div>
+            <div class="prayer-tile">
+              <div class="prayer-tile-name">Maghrib</div>
+              <div class="prayer-tile-time" id="tileMaghrib">06:48 PM</div>
+            </div>
+            <div class="prayer-tile">
+              <div class="prayer-tile-name">Isha</div>
+              <div class="prayer-tile-time" id="tileIsha">08:08 PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       6 CORE PILLARS
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section alt-bg" id="features">
+    <div class="landing-container">
+      <div class="section-head-center">
+        <span class="section-pill-tag">Core Architecture</span>
+        <h2 class="section-head-title">Engineered Around Pakistani Life</h2>
+        <p class="section-head-desc">
+          Six foundational features that bring your schedule into natural harmony with your faith and locale.
+        </p>
+      </div>
+
+      <div class="pillars-grid">
+        <!-- Pillar 1 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">schedule</span>
+          </div>
+          <h3>Astronomical Prayer Engine</h3>
+          <p>Real-time solar calculation using the official University of Islamic Sciences (Karachi) formula with Hanafi Asr.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> 11 Pakistani cities supported</li>
+            <li><span class="material-icons-round">check</span> Live countdown to next prayer</li>
+            <li><span class="material-icons-round">check</span> Azan notifications in browser</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">bedtime</span>
+          </div>
+          <h3>Ruet-Synced Hijri Calendar</h3>
+          <p>Dual Gregorian and Islamic lunar dates on every calendar cell, perfectly matching the Pakistani moon cycle.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> 1-click Central Ruet adjuster (±1d)</li>
+            <li><span class="material-icons-round">check</span> Islamic gazetted holidays pre-marked</li>
+            <li><span class="material-icons-round">check</span> Ashura, Eid & Shab-e-Barat support</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">shield</span>
+          </div>
+          <h3>Jummah Guard Protection</h3>
+          <p>Never accidentally schedule a meeting during Friday prayers again. Blocks Friday 12:45 PM – 2:30 PM.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> Real-time clash detection pill</li>
+            <li><span class="material-icons-round">check</span> 1-click auto-shift to safe 3:00 PM slot</li>
+            <li><span class="material-icons-round">check</span> Instant toggle override</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">wb_sunny</span>
+          </div>
+          <h3>Ramadan Mode & Load Shedding</h3>
+          <p>Adapts calendar view to Ramadan work hours (8 AM – 2 PM) with live Sehri/Iftar clocks and blackout overlays.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> Live Sehri & Iftar countdown clocks</li>
+            <li><span class="material-icons-round">check</span> 30-day roza counter & daily dua banner</li>
+            <li><span class="material-icons-round">check</span> City feeder outage window markers</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 5 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">translate</span>
+          </div>
+          <h3>Roman Urdu Quick-Add</h3>
+          <p>Type in conversational Roman Urdu or English and watch the parser extract title, date, and time instantly.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> "Meet Tariq kal shaam 5 baje"</li>
+            <li><span class="material-icons-round">check</span> "Doctor checkup parson dopahar 2 baje"</li>
+            <li><span class="material-icons-round">check</span> Full Urdu (اردو) RTL mode toggle</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 6 -->
+        <div class="pillar-card">
+          <div class="pillar-icon-wrap">
+            <span class="material-icons-round">phonelink_setup</span>
+          </div>
+          <h3>100% Private Offline PWA</h3>
+          <p>Zero signup, zero cookies, and zero server storage. Installable on Android, iOS, Windows, Mac, and Linux.</p>
+          <ul class="pillar-bullets">
+            <li><span class="material-icons-round">check</span> 100% localStorage on your device</li>
+            <li><span class="material-icons-round">check</span> Offline cache via Service Worker</li>
+            <li><span class="material-icons-round">check</span> WhatsApp 1-tap RSVP sharing & .ics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       CITIES & PROVINCES
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section" id="cities">
+    <div class="landing-container">
+      <div class="section-head-center">
+        <span class="section-pill-tag">Nationwide Coverage</span>
+        <h2 class="section-head-title">Built for All Provinces in Pakistan</h2>
+        <p class="section-head-desc">
+          Tailored astronomical prayer times and gazetted provincial public holidays across Federal, Sindh, Punjab, KPK, Balochistan, and Gilgit-Baltistan / AJK.
+        </p>
+      </div>
+
+      <div class="cities-grid">
+        <div class="city-card">
+          <span style="font-size:20px;">🌊</span>
+          <div class="city-card-info">
+            <h5>Karachi</h5>
+            <span>Sindh · 24.86°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🏰</span>
+          <div class="city-card-info">
+            <h5>Lahore</h5>
+            <span>Punjab · 31.52°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🏛️</span>
+          <div class="city-card-info">
+            <h5>Islamabad</h5>
+            <span>Capital · 33.68°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🎖️</span>
+          <div class="city-card-info">
+            <h5>Rawalpindi</h5>
+            <span>Punjab · 33.56°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🌸</span>
+          <div class="city-card-info">
+            <h5>Peshawar</h5>
+            <span>KPK · 34.01°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">⛰️</span>
+          <div class="city-card-info">
+            <h5>Quetta</h5>
+            <span>Balochistan · 30.18°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🕌</span>
+          <div class="city-card-info">
+            <h5>Multan</h5>
+            <span>Punjab · 30.15°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🏭</span>
+          <div class="city-card-info">
+            <h5>Faisalabad</h5>
+            <span>Punjab · 31.45°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">⚽</span>
+          <div class="city-card-info">
+            <h5>Sialkot</h5>
+            <span>Punjab · 32.49°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🌾</span>
+          <div class="city-card-info">
+            <h5>Hyderabad</h5>
+            <span>Sindh · 25.39°N</span>
+          </div>
+        </div>
+        <div class="city-card">
+          <span style="font-size:20px;">🏔️</span>
+          <div class="city-card-info">
+            <h5>Gilgit</h5>
+            <span>GB · 35.92°N</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       PRIVACY MANIFESTO
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section alt-bg" id="privacy">
+    <div class="landing-container">
+      <div class="privacy-box">
+        <div class="privacy-left">
+          <span class="section-pill-tag">Zero-Tracking Privacy</span>
+          <h3>Your Schedule Belongs Solely to You</h3>
+          <p>
+            Toggle Calendar operates on a client-side architecture. Your events, notes, and prayer reminders are saved exclusively inside your browser's private localStorage. No tracking pixels, no telemetry, and zero cloud leaks.
+          </p>
+          <div class="privacy-badges-grid">
+            <div class="privacy-badge-pill">
+              <span class="material-icons-round">check_circle</span>
+              <span>No Account or Sign-in Required</span>
+            </div>
+            <div class="privacy-badge-pill">
+              <span class="material-icons-round">check_circle</span>
+              <span>Zero Analytics or Ad Trackers</span>
+            </div>
+            <div class="privacy-badge-pill">
+              <span class="material-icons-round">check_circle</span>
+              <span>Installable Offline PWA</span>
+            </div>
+            <div class="privacy-badge-pill">
+              <span class="material-icons-round">check_circle</span>
+              <span>One-Click Export to .ICS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="privacy-right-seal">
+          <span class="material-icons-round">security</span>
+          <h4>100% Private</h4>
+          <p>Your calendar data never leaves your device.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       CALL TO ACTION BANNER
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="landing-section">
+    <div class="landing-container">
+      <div class="cta-banner-wrapper">
+        <h2>Schedule on Pakistan's Rhythm Today</h2>
+        <p>
+          Experience a calendar that respects your prayers, your holidays, and your language. Free forever, open source, and loads instantly.
+        </p>
+        <div class="cta-banner-actions">
+          <a href="index.html" class="btn-cta-white">
+            <span>Open Toggle Calendar</span>
+            <span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-left:4px;">arrow_forward</span>
+          </a>
+          <a href="https://github.com/Dattebayoolo/Toggle-Calendar" target="_blank" rel="noopener noreferrer" class="btn-cta-outline">
+            <span>View Source on GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <footer class="landing-footer">
+    <div class="landing-container">
+      <div class="footer-columns">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
+              <rect x="2" y="4" width="32" height="29" rx="7.5" fill="#01411c"/>
+              <rect x="2" y="4" width="8" height="29" fill="#ffffff"/>
+              <circle cx="21" cy="18" r="6.2" fill="#ffffff"/>
+            </svg>
+            <span style="font-family:var(--f-brand);font-weight:700;font-size:1.05rem;color:var(--t1);">Toggle Calendar</span>
+          </div>
+          <p style="font-size:0.84rem;color:var(--t2);line-height:1.6;max-width:300px;">
+            A product of Toggle Limited. Combining astronomical solar prayers, Hijri moon sync, Jummah protection, and Roman Urdu NLP into an installable web app.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Features</h5>
+          <ul>
+            <li><a href="#features">Astronomical Prayers</a></li>
+            <li><a href="#features">Ruet Hijri Sync</a></li>
+            <li><a href="#features">Jummah Guard</a></li>
+            <li><a href="#features">Ramadan Mode</a></li>
+            <li><a href="#features">Load Shedding Alert</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Platform</h5>
+          <ul>
+            <li><a href="index.html">Open Web App</a></li>
+            <li><a href="#sandbox">Interactive Sandbox</a></li>
+            <li><a href="#cities">Supported Cities</a></li>
+            <li><a href="#privacy">Privacy Manifesto</a></li>
+            <li><a href="manifest.json">PWA Manifest</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Open Source</h5>
+          <ul>
+            <li><a href="https://github.com/Dattebayoolo/Toggle-Calendar" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+            <li><a href="https://github.com/Dattebayoolo/Toggle-Calendar/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a></li>
+            <li><a href="README.md">Documentation</a></li>
+            <li><a href="https://github.com/Dattebayoolo/Toggle-Calendar/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom-row">
+        <span>© 2026 Toggle Calendar. A product of Toggle Limited. Released under the MIT Open Source License.</span>
+        <span>Made with 💚 in Pakistan 🇵🇰</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="landing.js"></script>
+</body>
+</html>

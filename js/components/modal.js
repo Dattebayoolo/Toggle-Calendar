@@ -9,6 +9,19 @@
   const Toggle = window.Toggle = window.Toggle || {};
   const modal = Toggle.modal = Toggle.modal || {};
 
+  /* Localized modal titles (Urdu mode via Toggle.URDU) */
+  Toggle._modalTitle = function(kind) {
+    const U = Toggle.URDU || {};
+    if ((Toggle.state && Toggle.state.lang) === 'ur') {
+      if (kind === 'create') return U.createEvent || 'Create Event';
+      if (kind === 'edit') return U.editEvent || 'Edit Event';
+      if (kind === 'editSeries') return `${U.editEvent || 'Edit Event'} (پوری سیریز)`;
+    }
+    if (kind === 'create') return 'Create Event';
+    if (kind === 'edit') return 'Edit Event';
+    return 'Edit Repeating Event';
+  };
+
   function updateOverlapAlerts() {
     const startEl = document.getElementById('eventStart');
     const endEl = document.getElementById('eventEnd');
@@ -86,7 +99,7 @@
   modal.openNewEventModal = function(date, startHour) {
     Toggle.state.editingId = null;
     const modalTitle = document.getElementById('modalTitle');
-    if (modalTitle) modalTitle.textContent = 'Create Event';
+    if (modalTitle) modalTitle.textContent = Toggle._modalTitle('create');
 
     const titleEl = document.getElementById('eventTitle');
     if (titleEl) titleEl.value = '';
@@ -153,7 +166,7 @@
 
     Toggle.state.editingId = id;
     const modalTitle = document.getElementById('modalTitle');
-    if (modalTitle) modalTitle.textContent = isOcc ? 'Edit Repeating Event' : 'Edit Event';
+    if (modalTitle) modalTitle.textContent = Toggle._modalTitle(isOcc ? 'editSeries' : 'edit');
 
     const titleEl = document.getElementById('eventTitle');
     if (titleEl) titleEl.value = ev.title;

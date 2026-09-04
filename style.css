@@ -830,6 +830,7 @@ input, select, textarea {
 .topbar-center {
   flex: 1;
   max-width: 480px;
+  min-width: 120px;
   margin: 0 8px;
 }
 .search-bar {
@@ -841,6 +842,7 @@ input, select, textarea {
   border-radius: var(--r-p);
   padding: 7px 16px;
   transition: all var(--dur-fast);
+  min-width: 0;
 }
 .search-bar:focus-within {
   background: var(--s0);
@@ -854,6 +856,7 @@ input, select, textarea {
 }
 .search-input {
   flex: 1;
+  min-width: 0;
   border: none;
   background: none;
   font-family: var(--f-body);
@@ -881,8 +884,9 @@ input, select, textarea {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* Ruet-e-Hilal Moon Adjuster */
@@ -894,6 +898,7 @@ input, select, textarea {
   border: 1px solid var(--div);
   border-radius: var(--r-p);
   padding: 2px 4px 2px 8px;
+  flex-shrink: 0;
 }
 .moon-badge-label {
   display: flex;
@@ -916,6 +921,7 @@ input, select, textarea {
   border-radius: var(--r-p);
   padding: 3px;
   gap: 2px;
+  flex-shrink: 0;
 }
 .chip {
   padding: 5px 12px;
@@ -940,18 +946,26 @@ input, select, textarea {
 
 /* User Avatar */
 .avatar {
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: linear-gradient(135deg, #2563eb, #059669);
   color: #fff;
   font-family: var(--f-brand);
   font-size: 0.88rem;
   font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
   user-select: none;
   transition: transform var(--dur-fast);
+  margin-left: 2px;
 }
 .avatar:hover {
   transform: scale(1.05);
@@ -2306,71 +2320,14 @@ input, select, textarea {
   cursor: grabbing;
 }
 
-/* ── Urdu / RTL Localization Mode (Pillar 4b) ── */
 /* ── Urdu Localization Mode (Pillar 4b) ──
    Typographic only: when <html lang="ur">, apply the Arabic font.
    Layout is intentionally NOT mirrored (dir stays ltr) so cards,
-   arrows, sidebar and topbar all keep their normal positions. */
+   arrows, sidebar and topbar all keep their normal positions.
+   (The old [dir="rtl"] mirror rules were removed in V0.3 — they
+   were dead code once layout flipping was dropped.) */
 [lang="ur"],
 [lang="ur"] body,
 [lang="ur"] .month-title {
   font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
-}
-[dir="rtl"] .sidebar {
-  border-right: none;
-  border-left: 1px solid var(--div);
-  /* Keep the sidebar docked on the LEFT even in RTL mode —
-     RTL flips the flex main-axis, which would otherwise push
-     it (and the hamburger) to the right side of the screen. */
-  order: 1;
-  /* Keep the sidebar's own layout LTR — switches, labels and icons
-     keep their normal sides. Urdu strings still render correctly
-     inside (Unicode bidi handles the text itself). */
-  direction: ltr;
-  text-align: left;
-}
-[dir="rtl"] .brand-icon {
-  margin-right: 0;
-  margin-left: 10px;
-}
-[dir="rtl"] .alert-action-btn {
-  margin-left: 0;
-  margin-right: auto;
-}
-[dir="rtl"] .ramadan-badge-fast {
-  margin-left: 0;
-  margin-right: auto;
-}
-[dir="rtl"] .day-number-row {
-  flex-direction: row-reverse;
-}
-[dir="rtl"] .prayer-active-tag {
-  margin-right: 0;
-  margin-left: 6px;
-}
-/* Keep the topbar layout LTR in Urdu mode — icons, month-nav arrows and
-   the search box stay in their usual places. Urdu strings inside (search
-   placeholder etc.) still render correctly via Unicode bidi. */
-[dir="rtl"] .topbar {
-  direction: ltr;
-}
-[dir="rtl"] .search-bar .search-icon {
-  left: 12px;
-  right: auto;
-}
-[dir="rtl"] .search-bar .search-input {
-  padding-left: 36px;
-  padding-right: 36px;
-}
-[dir="rtl"] .search-bar .search-kbd {
-  right: 10px;
-  left: auto;
-}
-[dir="rtl"] .sehri-block {
-  border-left: none;
-  border-right: 3px solid #818cf8;
-}
-[dir="rtl"] .iftar-block {
-  border-left: none;
-  border-right: 3px solid #f59e0b;
 }

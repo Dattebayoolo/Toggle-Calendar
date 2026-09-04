@@ -1,0 +1,1147 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TOGGLE CALENDAR — Landing & Branding Page Stylesheet
+   Designed to be 100% consistent with Toggle Calendar Design System (style.css)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page Layout Override (Landing page scrolls naturally) ── */
+html, body {
+  width: 100%;
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  background: var(--s1);
+  color: var(--t1);
+  font-family: var(--f-body);
+  display: block;
+}
+
+/* ── Subtitle and Accent Colors ── */
+:root {
+  --nav-h: 68px;
+}
+
+/* ── Container ── */
+.landing-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Sticky Navigation Bar (Matching App Topbar) ── */
+.landing-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-h);
+  background: rgba(var(--s0-rgb), 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--div);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  transition: background var(--dur), border-color var(--dur);
+}
+
+.landing-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--t1);
+  user-select: none;
+}
+
+.brand-link .brand-icon {
+  filter: drop-shadow(0 2px 6px rgba(1, 65, 28, 0.32));
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.brand-link:hover .brand-icon {
+  transform: scale(1.05);
+}
+
+.brand-link .brand-name {
+  font-family: var(--f-brand);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+.brand-link .brand-badge-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-l);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  padding: 2px 8px;
+  border-radius: var(--r-p);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Nav Menu Items */
+.landing-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+}
+
+.landing-nav-links a {
+  text-decoration: none;
+  font-family: var(--f-brand);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--t2);
+  padding: 7px 14px;
+  border-radius: var(--r-p);
+  transition: all var(--dur-fast);
+}
+
+.landing-nav-links a:hover {
+  background: var(--s2);
+  color: var(--t1);
+}
+
+.landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Hero Section ── */
+.landing-hero {
+  padding: 64px 0 80px;
+  position: relative;
+}
+
+.hero-header {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto 44px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background: var(--green-l);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  border-radius: var(--r-p);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 20px;
+}
+
+.hero-eyebrow .pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+  animation: pulseBeacon 1.8s infinite;
+}
+
+@keyframes pulseBeacon {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.hero-title {
+  font-family: var(--f-brand);
+  font-size: 3.4rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--t1);
+  margin-bottom: 18px;
+}
+
+.hero-title .text-emerald {
+  color: var(--green);
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--t2);
+  max-width: 680px;
+  margin: 0 auto 32px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-hero-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--r-p);
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  font-family: var(--f-brand);
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 16px var(--green-glow);
+  transition: all var(--dur-fast);
+}
+
+.btn-hero-launch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--green-glow);
+  filter: brightness(1.05);
+}
+
+.btn-hero-sandbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--r-p);
+  background: var(--s0);
+  border: 1px solid var(--div);
+  color: var(--t1);
+  font-family: var(--f-brand);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--e1);
+  transition: all var(--dur-fast);
+}
+
+.btn-hero-sandbox:hover {
+  background: var(--s2);
+  transform: translateY(-1.5px);
+  box-shadow: var(--e2);
+}
+
+/* Hero Feature Bar (Trust) */
+.hero-trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+
+.hero-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.hero-trust-item .material-icons-round {
+  font-size: 16px;
+  color: var(--green);
+}
+
+/* ── Interactive Window Mockup Frame (Realistic App Replica) ── */
+.app-window-frame {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--e3), 0 20px 50px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  max-width: 1040px;
+  margin: 40px auto 0;
+  transition: all var(--dur);
+}
+
+[data-theme="dark"] .app-window-frame {
+  box-shadow: var(--e-modal), 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+/* Window Chrome Top Titlebar */
+.window-chrome {
+  background: var(--s1);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--div);
+  gap: 14px;
+}
+
+.window-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.window-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.window-dot.red { background: #ff5f56; }
+.window-dot.yellow { background: #ffbd2e; }
+.window-dot.green { background: #27c93f; }
+
+.window-url-bar {
+  flex: 1;
+  max-width: 380px;
+  margin: 0 auto;
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-p);
+  padding: 3px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--t2);
+}
+
+.window-url-bar .material-icons-round {
+  font-size: 13px;
+  color: var(--green);
+}
+
+/* Window Inner Shell */
+.window-app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 480px;
+  background: var(--s0);
+}
+
+/* Mockup Sidebar */
+.mockup-sidebar {
+  background: var(--s0);
+  border-right: 1px solid var(--div);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mockup-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-family: var(--f-brand);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px var(--blue-glow);
+}
+
+.mockup-fab .material-icons-round {
+  font-size: 18px;
+}
+
+.mockup-toggles-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mockup-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--r-m);
+  background: var(--s1);
+  border: 1px solid var(--div);
+}
+
+.mockup-toggle-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.mockup-toggle-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+.mockup-toggle-sub {
+  font-size: 0.68rem;
+  color: var(--t3);
+}
+
+/* Mockup Prayer Section */
+.mockup-prayer-box {
+  background: var(--s1);
+  border: 1px solid var(--div);
+  border-radius: var(--r-l);
+  padding: 12px;
+}
+
+.mockup-prayer-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 8px;
+}
+
+/* Mockup Main Board */
+.mockup-main {
+  display: flex;
+  flex-direction: column;
+  background: var(--s0);
+}
+
+.mockup-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--div);
+  background: var(--s0);
+  gap: 12px;
+}
+
+.mockup-date-title {
+  font-family: var(--f-brand);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--t1);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mockup-date-title .hijri-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* Mockup Calendar Grid (Day View / Mini Week) */
+.mockup-grid {
+  flex: 1;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--s1);
+}
+
+.mockup-event-banner {
+  padding: 12px 14px;
+  border-radius: var(--r-l);
+  background: var(--s0);
+  border: 1px solid var(--div);
+  box-shadow: var(--e1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform var(--dur-fast);
+}
+
+.mockup-event-banner:hover {
+  transform: translateX(3px);
+}
+
+.mockup-event-banner.jummah {
+  border-left: 5px solid var(--green);
+  background: linear-gradient(90deg, var(--green-l) 0%, var(--s0) 70%);
+}
+
+.mockup-event-banner.meeting {
+  border-left: 5px solid var(--blue);
+}
+
+.mockup-event-banner.ramadan {
+  border-left: 5px solid var(--amber);
+  background: linear-gradient(90deg, var(--amber-l) 0%, var(--s0) 70%);
+}
+
+.mockup-event-banner.loadshed {
+  border-left: 5px solid var(--red);
+  background: linear-gradient(90deg, var(--red-l) 0%, var(--s0) 70%);
+}
+
+.event-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.event-banner-time {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--t3);
+  font-feature-settings: "tnum";
+  min-width: 72px;
+}
+
+.event-banner-info h5 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+.event-banner-info p {
+  font-size: 0.75rem;
+  color: var(--t2);
+}
+
+/* ── Section Component General ── */
+.landing-section {
+  padding: 90px 0;
+  border-top: 1px solid var(--div);
+  background: var(--s0);
+}
+
+.landing-section.alt-bg {
+  background: var(--s1);
+}
+
+.section-head-center {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 52px;
+}
+
+.section-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-l);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  padding: 3px 12px;
+  border-radius: var(--r-p);
+  margin-bottom: 12px;
+}
+
+.section-head-title {
+  font-family: var(--f-brand);
+  font-size: 2.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--t1);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.section-head-desc {
+  font-size: 1.05rem;
+  color: var(--t2);
+  line-height: 1.6;
+}
+
+/* ── Comparison Cards Grid ── */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.comp-card {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-xl);
+  padding: 32px;
+  box-shadow: var(--e1);
+}
+
+.comp-card.western {
+  border-top: 4px solid var(--red);
+}
+
+.comp-card.toggle {
+  border-top: 4px solid var(--green);
+  background: linear-gradient(180deg, var(--green-l) 0%, var(--s0) 35%);
+  box-shadow: var(--e2);
+}
+
+.comp-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--div-l);
+}
+
+.comp-header h3 {
+  font-family: var(--f-brand);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--t1);
+}
+
+.comp-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.comp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.comp-item .material-icons-round {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.comp-card.western .comp-item .material-icons-round {
+  color: var(--red);
+}
+
+.comp-card.toggle .comp-item .material-icons-round {
+  color: var(--green);
+}
+
+.comp-item-content h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-bottom: 3px;
+}
+
+.comp-item-content p {
+  font-size: 0.86rem;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+/* ── Interactive Playground Section ── */
+.playground-card {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--e2);
+  padding: 36px;
+}
+
+.playground-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--div);
+  padding-bottom: 14px;
+}
+
+.playground-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--r-p);
+  background: var(--s1);
+  border: 1px solid var(--div);
+  font-family: var(--f-brand);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+
+.playground-tab-btn.active {
+  background: var(--green-l);
+  color: var(--green);
+  border-color: rgba(5, 150, 105, 0.35);
+  box-shadow: 0 2px 8px var(--green-glow);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* NLP Demo */
+.nlp-box-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.nlp-input-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.nlp-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.nlp-preset-btn {
+  background: var(--s1);
+  border: 1px solid var(--div);
+  padding: 5px 12px;
+  border-radius: var(--r-p);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+
+.nlp-preset-btn:hover {
+  background: var(--green-l);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.nlp-results-card {
+  background: var(--s1);
+  border: 1px solid var(--div);
+  border-radius: var(--r-xl);
+  padding: 24px;
+}
+
+.nlp-res-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 16px;
+}
+
+.nlp-res-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nlp-res-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--s0);
+  border: 1px solid var(--div-l);
+  border-radius: var(--r-m);
+}
+
+.nlp-res-lbl {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--t3);
+}
+
+.nlp-res-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+/* Prayer Explorer */
+.prayer-explorer-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.prayer-tile {
+  background: var(--s1);
+  border: 1px solid var(--div);
+  border-radius: var(--r-l);
+  padding: 16px;
+  text-align: center;
+  transition: all var(--dur-fast);
+}
+
+.prayer-tile:hover {
+  background: var(--s0);
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: var(--e1);
+}
+
+.prayer-tile-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 6px;
+}
+
+.prayer-tile-time {
+  font-family: var(--f-brand);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--t1);
+  font-feature-settings: "tnum";
+}
+
+/* ── 6 Core Pillars Grid ── */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pillar-card {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-xl);
+  padding: 28px;
+  box-shadow: var(--e1);
+  transition: all var(--dur-fast);
+}
+
+.pillar-card:hover {
+  border-color: var(--green);
+  transform: translateY(-3px);
+  box-shadow: var(--e2);
+}
+
+.pillar-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-l);
+  background: var(--green-l);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  margin-bottom: 20px;
+}
+
+.pillar-icon-wrap .material-icons-round {
+  font-size: 24px;
+}
+
+.pillar-card h3 {
+  font-family: var(--f-brand);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-bottom: 8px;
+}
+
+.pillar-card p {
+  font-size: 0.88rem;
+  color: var(--t2);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.pillar-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pillar-bullets li {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--t2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pillar-bullets li .material-icons-round {
+  font-size: 14px;
+  color: var(--green);
+}
+
+/* ── Cities Grid ── */
+.cities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.city-card {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-l);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--e1);
+  transition: all var(--dur-fast);
+}
+
+.city-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: var(--e2);
+}
+
+.city-card-info h5 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+.city-card-info span {
+  font-size: 0.72rem;
+  color: var(--t3);
+}
+
+/* ── Privacy Banner ── */
+.privacy-box {
+  background: var(--s0);
+  border: 1px solid var(--div);
+  border-radius: var(--r-2xl);
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 32px;
+  align-items: center;
+  box-shadow: var(--e2);
+}
+
+.privacy-left h3 {
+  font-family: var(--f-brand);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--t1);
+  margin-bottom: 12px;
+}
+
+.privacy-left p {
+  font-size: 0.95rem;
+  color: var(--t2);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.privacy-badges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.privacy-badge-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.privacy-badge-pill .material-icons-round {
+  font-size: 18px;
+  color: var(--green);
+}
+
+.privacy-right-seal {
+  background: var(--green-l);
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  border-radius: var(--r-xl);
+  padding: 32px;
+  text-align: center;
+}
+
+.privacy-right-seal .material-icons-round {
+  font-size: 48px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+
+.privacy-right-seal h4 {
+  font-family: var(--f-brand);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.privacy-right-seal p {
+  font-size: 0.8rem;
+  color: var(--t2);
+}
+
+/* ── Final Call to Action Section ── */
+.cta-banner-wrapper {
+  background: linear-gradient(135deg, #01411c 0%, #057a3e 50%, #06964c 100%);
+  border-radius: var(--r-2xl);
+  padding: 56px 36px;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 10px 30px var(--green-glow);
+}
+
+.cta-banner-wrapper h2 {
+  font-family: var(--f-brand);
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.cta-banner-wrapper p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 600px;
+  margin: 0 auto 32px;
+}
+
+.cta-banner-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-cta-white {
+  background: #ffffff;
+  color: #01411c;
+  padding: 12px 28px;
+  border-radius: var(--r-p);
+  font-family: var(--f-brand);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transition: all var(--dur-fast);
+}
+
+.btn-cta-white:hover {
+  transform: translateY(-2px);
+  background: #f8fafc;
+}
+
+.btn-cta-outline {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 12px 24px;
+  border-radius: var(--r-p);
+  font-family: var(--f-brand);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--dur-fast);
+}
+
+.btn-cta-outline:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+/* ── Footer ── */
+.landing-footer {
+  background: var(--s0);
+  border-top: 1px solid var(--div);
+  padding: 48px 0 28px;
+  font-size: 0.86rem;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 36px;
+  margin-bottom: 40px;
+}
+
+.footer-col h5 {
+  font-family: var(--f-brand);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--t1);
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-col ul li a {
+  text-decoration: none;
+  color: var(--t2);
+  transition: color var(--dur-fast);
+}
+
+.footer-col ul li a:hover {
+  color: var(--green);
+}
+
+.footer-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid var(--div-l);
+  color: var(--t3);
+  font-size: 0.8rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .hero-title { font-size: 2.5rem; }
+  .window-app-shell { grid-template-columns: 1fr; }
+  .mockup-sidebar { display: none; }
+  .comparison-grid { grid-template-columns: 1fr; }
+  .nlp-box-layout { grid-template-columns: 1fr; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  .prayer-explorer-cards { grid-template-columns: repeat(2, 1fr); }
+  .privacy-box { grid-template-columns: 1fr; }
+  .footer-columns { grid-template-columns: 1fr 1fr; }
+  .landing-nav-links { display: none; }
+}

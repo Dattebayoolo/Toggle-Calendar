@@ -60,26 +60,24 @@ Toggle Calendar is a pure client-side web application — clone and open:
 git clone https://github.com/Dattebayoolo/Toggle-Calendar.git
 cd Toggle-Calendar
 
-# 2. Open it (or serve it for PWA features)
-start index.html        # Windows
-open index.html         # macOS
-xdg-open index.html     # Linux
+# 2. Start the local dev server & page router (zero external dependencies)
+npm run dev
 ```
 
-> 💡 **For the full PWA experience** (Service Worker caching, desktop/mobile install prompt):
->
-> ```bash
-> npx serve .          # or: python -m http.server 8080
-> ```
+Then open your browser:
+- 🚀 **Landing Page & Brand Showcase**: `http://localhost:3000/`
+- 📅 **Calendar Web Application**: `http://localhost:3000/app`
 
-Then open `http://localhost:3000` (or `:8080`) and click **Install** in the topbar.
+> 💡 **For offline PWA features**: click **Install** in the calendar topbar to install on desktop or mobile.
 
 ## 📂 Project Structure
 
 ```
 Toggle-Calendar/
 ├── 📄 index.html          # App shell, PWA meta tags & modals
+├── 🚀 landing.html        # Marketing landing page & brand showcase
 ├── 🎨 style.css           # Modern design system, light/dark themes, RTL & drag styles
+├── 🎨 landing.css         # Responsive landing page layout & showcase styles
 ├── 📱 manifest.json       # Web App Manifest for mobile & desktop installation
 ├── ⚙️  sw.js               # Service Worker with cache-first offline support
 ├── 🖼️  icons/             # PWA app icons (192px, 512px, vector badge)
