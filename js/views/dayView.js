@@ -56,6 +56,7 @@
 
       const evs = (utils.getEventsForDay ? utils.getEventsForDay(d) : []).map(ev => views.buildWeekEventBlock ? views.buildWeekEventBlock(ev) : '').join('');
       const prayer = views.buildPrayerBlocks ? views.buildPrayerBlocks(d) : '';
+      const sehriIftar = views.buildRamadanSehriIftarBlocks ? views.buildRamadanSehriIftarBlocks(d) : '';
       const loadShedding = views.buildLoadSheddingBlocks ? views.buildLoadSheddingBlocks(d) : '';
       const ramadan = views.buildRamadanBlocks ? views.buildRamadanBlocks(d) : '';
 
@@ -67,6 +68,7 @@
       col.innerHTML = `
         ${blocks}
         ${ramadan}
+        ${sehriIftar}
         ${loadShedding}
         ${prayer}
         ${jum}
@@ -77,10 +79,143 @@
       // Event click -> Popover
       col.querySelectorAll('.week-event-block').forEach(el => {
         el.addEventListener('click', e => {
+          if (e.target.closest('.resize-handle')) return;
           e.stopPropagation();
           if (Toggle.popover && typeof Toggle.popover.showEventPopover === 'function') {
             Toggle.popover.showEventPopover(el.dataset.id, el);
           }
+        });
+
+        // Drag & Drop: dragstart
+        el.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', el.dataset.id);
+          e.dataTransfer.effectAllowed = 'move';
+          el.classList.add('dragging');
+          window.__toggleDraggingId = el.dataset.id;
+        });
+
+        el.addEventListener('dragend', () => {
+          el.classList.remove('dragging');
+          window.__toggleDraggingId = null;
+        });
+      });
+
+      // Drag over and Drop on day-col
+      col.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        col.classList.add('drag-over');
+      });
+
+      col.addEventListener('dragleave', () => {
+        col.classList.remove('drag-over');
+      });
+
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        const id = window.__toggleDraggingId || e.dataTransfer.getData('text/plain');
+        if (!id) return;
+
+        const isOcc = String(id).includes('__occ__');
+        const parentId = isOcc ? String(id).split('__occ__')[0] : id;
+        const ev = Toggle.state.events.find(x => x.id === parentId);
+        if (!ev) return;
+
+        const colRect = col.getBoundingClientRect();
+        const y = Math.max(0, e.clientY - colRect.top);
+        const totalMin = y / PX_PER_MIN;
+        const snappedMin = Math.max(0, Math.min(1380, Math.round(totalMin / 15) * 15));
+
+        const targetDate = new Date(d);
+        const pad = n => n.toString().padStart(2, '0');
+        const yyyy = targetDate.getFullYear();
+        const mm = pad(targetDate.getMonth() + 1);
+        const dd = pad(targetDate.getDate());
+
+        const startH = Math.floor(snappedMin / 60);
+        const startM = snappedMin % 60;
+        const newStart = `${yyyy}-${mm}-${dd}T${pad(startH)}:${pad(startM)}`;
+
+        const oldStart = new Date(ev.start);
+        const oldEnd = ev.end ? new Date(ev.end) : new Date(oldStart.getTime() + 3600000);
+        const durMs = Math.max(oldEnd.getTime() - oldStart.getTime(), 15 * 60000);
+        const newEndDt = new Date(new Date(newStart).getTime() + durMs);
+        const newEnd = `${newEndDt.getFullYear()}-${pad(newEndDt.getMonth() + 1)}-${pad(newEndDt.getDate())}T${pad(newEndDt.getHours())}:${pad(newEndDt.getMinutes())}`;
+
+        if (isOcc) {
+          const occDateKey = String(id).split('__occ__')[1];
+          const moveAll = confirm('This is a repeating event.\n\nClick OK to shift ALL future occurrences to this new time.\nClick Cancel to move ONLY this single occurrence.');
+          if (moveAll) {
+            ev.start = newStart;
+            ev.end = newEnd;
+          } else {
+            ev.exdates = ev.exdates || [];
+            if (!ev.exdates.includes(occDateKey)) ev.exdates.push(occDateKey);
+            Toggle.state.events.push({
+              ...ev,
+              id: Toggle.getEventId(),
+              start: newStart,
+              end: newEnd,
+              recurrence: null,
+              exdates: [],
+            });
+          }
+        } else {
+          ev.start = newStart;
+          ev.end = newEnd;
+        }
+
+        Toggle.saveEvents();
+        views.renderDayView();
+        if (Toggle.popover && typeof Toggle.popover.showToast === 'function') {
+          const timeStr = `${startH % 12 || 12}:${pad(startM)} ${startH >= 12 ? 'PM' : 'AM'}`;
+          Toggle.popover.showToast(`Rescheduled to ${timeStr}`);
+        }
+      });
+
+      // Vertical Resize Handle
+      col.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.addEventListener('mousedown', e => {
+          e.stopPropagation();
+          e.preventDefault();
+          const id = handle.dataset.id;
+          const parentId = String(id).includes('__occ__') ? String(id).split('__occ__')[0] : id;
+          const ev = Toggle.state.events.find(x => x.id === parentId);
+          if (!ev) return;
+
+          const block = handle.closest('.week-event-block');
+          const startY = e.clientY;
+          const startHeight = parseFloat(block.style.height) || 26;
+
+          function onMouseMove(moveEvent) {
+            const dy = moveEvent.clientY - startY;
+            const newHeight = Math.max(22, startHeight + dy);
+            block.style.height = `${newHeight}px`;
+          }
+
+          function onMouseUp(upEvent) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+
+            const dy = upEvent.clientY - startY;
+            const finalHeight = Math.max(22, startHeight + dy);
+            const durMin = Math.max(15, Math.round((finalHeight / PX_PER_MIN) / 15) * 15);
+
+            const sDt = new Date(ev.start);
+            const eDt = new Date(sDt.getTime() + durMin * 60000);
+            const pad = n => n.toString().padStart(2, '0');
+            ev.end = `${eDt.getFullYear()}-${pad(eDt.getMonth() + 1)}-${pad(eDt.getDate())}T${pad(eDt.getHours())}:${pad(eDt.getMinutes())}`;
+
+            Toggle.saveEvents();
+            views.renderDayView();
+            if (Toggle.popover && typeof Toggle.popover.showToast === 'function') {
+              Toggle.popover.showToast(`Duration: ${durMin} min`);
+            }
+          }
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
         });
       });
 

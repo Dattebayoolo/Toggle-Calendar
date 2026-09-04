@@ -197,7 +197,12 @@ input, select, textarea {
   scrollbar-color: var(--div) transparent;
   z-index: 40;
   border-right: 1px solid var(--div);
-  transition: background var(--dur), border-color var(--dur);
+  transition: background var(--dur), border-color var(--dur), margin-left var(--dur) var(--ease);
+}
+
+/* Desktop collapse (hamburger on > 960px): slide the sidebar out of flow */
+.sidebar-collapsed .sidebar {
+  margin-left: calc(-1 * var(--sb-w));
 }
 
 .sidebar::-webkit-scrollbar { width: 5px; }
@@ -230,6 +235,25 @@ input, select, textarea {
   color: var(--t1);
 }
 .menu-btn .material-icons-round { font-size: 21px; }
+
+/* Mobile-only topbar hamburger + overlay backdrop.
+   On desktop the button only appears while the sidebar is collapsed,
+   so there's always a way to bring the sidebar back. */
+.topbar-menu-btn { display: none; }
+.sidebar-collapsed .topbar-menu-btn { display: flex; }
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 26, 0.45);
+  z-index: 199;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
+}
+.sidebar-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .brand {
   display: flex;
@@ -1978,6 +2002,9 @@ input, select, textarea {
     transition: transform var(--dur) var(--ease);
   }
   .sidebar.open { transform: translateX(0); }
+  /* On mobile the topbar hamburger opens the off-canvas sidebar instead */
+  .topbar-menu-btn { display: flex; }
+  .sidebar-collapsed .sidebar { margin-left: 0; }
   .topbar-center { display: none; }
   .mobile-fab { display: flex; }
   .sidebar-fab { display: none; }
@@ -1988,4 +2015,362 @@ input, select, textarea {
   .chip[data-view="agenda"], .chip[data-view="day"] { display: none; }
   .month-title { font-size: 1.05rem; }
   .feature-pills .status-pill:not(:first-child) { display: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   V0.2 ENHANCEMENTS — PWA, NLP, RAMADAN, DRAG & DROP, RTL LOCALIZATION
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Topbar Install & Language Chips ── */
+.install-app-chip {
+  background: linear-gradient(135deg, #059669, #01411c) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  animation: pulseInstall 3s infinite;
+}
+@keyframes pulseInstall {
+  0%, 100% { box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35); }
+  50% { box-shadow: 0 4px 14px rgba(5, 150, 105, 0.6); }
+}
+
+.lang-chip {
+  font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  color: var(--t1);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Natural Language Processing (NLP) Suggestion Strip ── */
+.nlp-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 6px 0 12px 0;
+  border-radius: var(--r-m);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(5, 150, 105, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  animation: slideDown 0.2s var(--ease);
+}
+.nlp-sparkle {
+  color: #2563eb;
+  font-size: 18px;
+  animation: spinSlow 6s linear infinite;
+}
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.nlp-summary {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.4;
+}
+.nlp-apply-btn {
+  padding: 4px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--r-p);
+  cursor: pointer;
+  transition: background var(--dur-fast), transform var(--dur-fast);
+  white-space: nowrap;
+}
+.nlp-apply-btn:hover {
+  background: #1d4ed8;
+  transform: scale(1.03);
+}
+
+/* ── Recurrence & Reminders Form Rows ── */
+.recurrence-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.recurrence-until-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Modal Overlap Alerts (Jummah Guard & Load Shedding) ── */
+.modal-overlap-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 14px 0;
+}
+.alert-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-m);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.alert-row.jummah-alert {
+  background: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  color: var(--t1);
+}
+.alert-row.jummah-alert .alert-icon {
+  color: #059669;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.alert-row.outage-alert {
+  background: rgba(225, 29, 72, 0.1);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: var(--t1);
+}
+.alert-row.outage-alert .alert-icon {
+  color: #e11d48;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.alert-action-btn {
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: var(--r-p);
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  background: #059669;
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--dur-fast);
+}
+.alert-action-btn:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+/* ── Ramadan Sidebar Timings Card ── */
+.ramadan-section {
+  background: linear-gradient(145deg, rgba(217, 119, 6, 0.08), rgba(1, 65, 28, 0.08));
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: var(--r-l);
+  padding: 12px;
+  margin: 10px 0;
+}
+.ramadan-badge-fast {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--amber);
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: var(--r-p);
+  margin-left: auto;
+}
+.ramadan-timings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ramadan-timing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.84rem;
+}
+.ramadan-time-label {
+  color: var(--t2);
+  font-weight: 500;
+}
+.ramadan-time-val {
+  color: var(--t1);
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.02em;
+}
+.ramadan-countdown {
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: var(--r-m);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+.countdown-sehri {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+.countdown-fasting {
+  background: rgba(217, 119, 6, 0.14);
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+.countdown-done {
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+/* ── Ramadan Overlay Blocks (Grid Views) ── */
+.ramadan-overlay-block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+.sehri-block {
+  background: linear-gradient(90deg, #1e1b4b, #312e81);
+  color: #c7d2fe;
+  border-left: 3px solid #818cf8;
+}
+.iftar-block {
+  background: linear-gradient(90deg, #78350f, #b45309);
+  color: #fef3c7;
+  border-left: 3px solid #f59e0b;
+}
+
+/* ── Drag & Drop + Vertical Resize Handles (Pillar 5) ── */
+.week-event-block {
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.week-event-block:active {
+  cursor: grabbing;
+}
+.week-event-block.dragging,
+.event-chip.dragging {
+  opacity: 0.45 !important;
+  transform: scale(0.97);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  cursor: ns-resize;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.resize-handle::after {
+  content: '';
+  width: 24px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 1px;
+  transition: background var(--dur-fast);
+}
+.resize-handle:hover::after {
+  background: #ffffff;
+  height: 3px;
+}
+
+.week-col.drag-over,
+.day-col.drag-over,
+.day-cell.drag-over {
+  background: rgba(37, 99, 235, 0.08) !important;
+  outline: 2px dashed #2563eb !important;
+  outline-offset: -2px;
+}
+
+.event-chip[draggable="true"] {
+  cursor: grab;
+  user-select: none;
+}
+.event-chip[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* ── Urdu / RTL Localization Mode (Pillar 4b) ── */
+/* ── Urdu Localization Mode (Pillar 4b) ──
+   Typographic only: when <html lang="ur">, apply the Arabic font.
+   Layout is intentionally NOT mirrored (dir stays ltr) so cards,
+   arrows, sidebar and topbar all keep their normal positions. */
+[lang="ur"],
+[lang="ur"] body,
+[lang="ur"] .month-title {
+  font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+[dir="rtl"] .sidebar {
+  border-right: none;
+  border-left: 1px solid var(--div);
+  /* Keep the sidebar docked on the LEFT even in RTL mode —
+     RTL flips the flex main-axis, which would otherwise push
+     it (and the hamburger) to the right side of the screen. */
+  order: 1;
+  /* Keep the sidebar's own layout LTR — switches, labels and icons
+     keep their normal sides. Urdu strings still render correctly
+     inside (Unicode bidi handles the text itself). */
+  direction: ltr;
+  text-align: left;
+}
+[dir="rtl"] .brand-icon {
+  margin-right: 0;
+  margin-left: 10px;
+}
+[dir="rtl"] .alert-action-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
+[dir="rtl"] .ramadan-badge-fast {
+  margin-left: 0;
+  margin-right: auto;
+}
+[dir="rtl"] .day-number-row {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .prayer-active-tag {
+  margin-right: 0;
+  margin-left: 6px;
+}
+/* Keep the topbar layout LTR in Urdu mode — icons, month-nav arrows and
+   the search box stay in their usual places. Urdu strings inside (search
+   placeholder etc.) still render correctly via Unicode bidi. */
+[dir="rtl"] .topbar {
+  direction: ltr;
+}
+[dir="rtl"] .search-bar .search-icon {
+  left: 12px;
+  right: auto;
+}
+[dir="rtl"] .search-bar .search-input {
+  padding-left: 36px;
+  padding-right: 36px;
+}
+[dir="rtl"] .search-bar .search-kbd {
+  right: 10px;
+  left: auto;
+}
+[dir="rtl"] .sehri-block {
+  border-left: none;
+  border-right: 3px solid #818cf8;
+}
+[dir="rtl"] .iftar-block {
+  border-left: none;
+  border-right: 3px solid #f59e0b;
 }

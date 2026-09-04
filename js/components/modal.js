@@ -91,6 +91,21 @@
     const titleEl = document.getElementById('eventTitle');
     if (titleEl) titleEl.value = '';
 
+    const nlpStrip = document.getElementById('nlpStrip');
+    if (nlpStrip) nlpStrip.classList.add('hidden');
+
+    const recEl = document.getElementById('eventRecurrence');
+    if (recEl) recEl.value = 'none';
+
+    const recWrap = document.getElementById('recurrenceUntilWrap');
+    if (recWrap) recWrap.classList.add('hidden');
+
+    const untilEl = document.getElementById('eventUntil');
+    if (untilEl) untilEl.value = '';
+
+    const remEl = document.getElementById('eventReminder');
+    if (remEl) remEl.value = '15';
+
     const catEl = document.getElementById('eventCategory');
     if (catEl) catEl.value = 'work';
 
@@ -131,21 +146,63 @@
   };
 
   modal.openEditEventModal = function(id) {
-    const ev = (Toggle.state && Toggle.state.events || []).find(e => e.id === id);
+    const isOcc = String(id).includes('__occ__');
+    const parentId = isOcc ? String(id).split('__occ__')[0] : id;
+    const ev = (Toggle.state && Toggle.state.events || []).find(e => e.id === parentId);
     if (!ev) return;
 
     Toggle.state.editingId = id;
     const modalTitle = document.getElementById('modalTitle');
-    if (modalTitle) modalTitle.textContent = 'Edit Event';
+    if (modalTitle) modalTitle.textContent = isOcc ? 'Edit Repeating Event' : 'Edit Event';
 
     const titleEl = document.getElementById('eventTitle');
     if (titleEl) titleEl.value = ev.title;
 
+    const nlpStrip = document.getElementById('nlpStrip');
+    if (nlpStrip) nlpStrip.classList.add('hidden');
+
     const startEl = document.getElementById('eventStart');
-    if (startEl) startEl.value = ev.start;
+    if (startEl) {
+      if (isOcc) {
+        const occDateKey = String(id).split('__occ__')[1];
+        const sTime = ev.start.includes('T') ? ev.start.split('T')[1] : '10:00';
+        startEl.value = `${occDateKey}T${sTime}`;
+      } else {
+        startEl.value = ev.start;
+      }
+    }
 
     const endEl = document.getElementById('eventEnd');
-    if (endEl) endEl.value = ev.end || '';
+    if (endEl) {
+      if (isOcc && ev.end) {
+        const occDateKey = String(id).split('__occ__')[1];
+        const eTime = ev.end.includes('T') ? ev.end.split('T')[1] : '11:00';
+        endEl.value = `${occDateKey}T${eTime}`;
+      } else {
+        endEl.value = ev.end || '';
+      }
+    }
+
+    const recEl = document.getElementById('eventRecurrence');
+    const recWrap = document.getElementById('recurrenceUntilWrap');
+    const untilEl = document.getElementById('eventUntil');
+    if (recEl) {
+      recEl.value = (ev.recurrence && ev.recurrence.freq) ? ev.recurrence.freq : 'none';
+      if (recWrap) {
+        if (recEl.value !== 'none') {
+          recWrap.classList.remove('hidden');
+          if (untilEl) untilEl.value = ev.recurrence?.until || '';
+        } else {
+          recWrap.classList.add('hidden');
+          if (untilEl) untilEl.value = '';
+        }
+      }
+    }
+
+    const remEl = document.getElementById('eventReminder');
+    if (remEl) {
+      remEl.value = ev.reminder !== undefined ? String(ev.reminder) : '15';
+    }
 
     const catEl = document.getElementById('eventCategory');
     if (catEl) catEl.value = ev.category || 'work';
@@ -168,6 +225,8 @@
   modal.closeModal = function() {
     const overlay = document.getElementById('modalOverlay');
     if (overlay) overlay.classList.remove('open');
+    const nlpStrip = document.getElementById('nlpStrip');
+    if (nlpStrip) nlpStrip.classList.add('hidden');
   };
 
   modal.saveEvent = function(e) {
@@ -182,6 +241,9 @@
     const locEl = document.getElementById('eventLocation');
     const descEl = document.getElementById('eventDesc');
     const attEl = document.getElementById('eventAttendees');
+    const recEl = document.getElementById('eventRecurrence');
+    const untilEl = document.getElementById('eventUntil');
+    const remEl = document.getElementById('eventReminder');
 
     const startVal = startEl ? startEl.value : '';
     let endVal = endEl ? endEl.value : '';
@@ -192,11 +254,21 @@
       endVal = `${eDate.getFullYear()}-${pad(eDate.getMonth()+1)}-${pad(eDate.getDate())}T${pad(eDate.getHours())}:${pad(eDate.getMinutes())}`;
     }
 
+    const recurrence = (recEl && recEl.value !== 'none') ? {
+      freq: recEl.value,
+      until: (untilEl && untilEl.value) ? untilEl.value : null,
+    } : null;
+
+    const reminder = remEl ? remEl.value : '15';
+
     const ev = {
       id: Toggle.state.editingId || Toggle.getEventId(),
       title,
       start: startVal,
       end: endVal,
+      recurrence,
+      reminder,
+      exdates: [],
       category: catEl ? catEl.value : 'work',
       location: locEl ? locEl.value.trim() : '',
       description: descEl ? descEl.value.trim() : '',
@@ -204,9 +276,47 @@
       notify: [...document.querySelectorAll('[name="notifMethod"]:checked')].map(c => c.value),
     };
 
-    if (Toggle.state.editingId) {
-      const idx = Toggle.state.events.findIndex(x => x.id === Toggle.state.editingId);
-      if (idx !== -1) Toggle.state.events[idx] = ev;
+    const editingId = Toggle.state.editingId;
+    if (editingId) {
+      const isOcc = String(editingId).includes('__occ__');
+      if (isOcc) {
+        const parentId = String(editingId).split('__occ__')[0];
+        const occDateKey = String(editingId).split('__occ__')[1];
+        const editAll = confirm('This is a repeating event.\n\nClick OK to update ALL occurrences in the series.\nClick Cancel to update ONLY this occurrence.');
+        if (editAll) {
+          const parentIdx = Toggle.state.events.findIndex(x => x.id === parentId);
+          if (parentIdx !== -1) {
+            Toggle.state.events[parentIdx] = {
+              ...Toggle.state.events[parentIdx],
+              title: ev.title,
+              category: ev.category,
+              location: ev.location,
+              description: ev.description,
+              attendees: ev.attendees,
+              recurrence: ev.recurrence,
+              reminder: ev.reminder,
+              notify: ev.notify,
+            };
+          }
+        } else {
+          // Exclude this date from parent
+          const parent = Toggle.state.events.find(x => x.id === parentId);
+          if (parent) {
+            parent.exdates = parent.exdates || [];
+            if (!parent.exdates.includes(occDateKey)) parent.exdates.push(occDateKey);
+          }
+          // Add as separate event
+          ev.id = Toggle.getEventId();
+          ev.recurrence = null;
+          Toggle.state.events.push(ev);
+        }
+      } else {
+        const idx = Toggle.state.events.findIndex(x => x.id === editingId);
+        if (idx !== -1) {
+          ev.exdates = Toggle.state.events[idx].exdates || [];
+          Toggle.state.events[idx] = ev;
+        }
+      }
     } else {
       Toggle.state.events.push(ev);
     }
@@ -242,6 +352,55 @@
 
     const startEl = document.getElementById('eventStart');
     const endEl = document.getElementById('eventEnd');
+    const titleEl = document.getElementById('eventTitle');
+    const nlpStrip = document.getElementById('nlpStrip');
+    const nlpSummary = document.getElementById('nlpSummary');
+    const nlpApplyBtn = document.getElementById('nlpApplyBtn');
+    const recEl = document.getElementById('eventRecurrence');
+    const recWrap = document.getElementById('recurrenceUntilWrap');
+
+    // Recurrence dropdown toggles 'until' date wrap
+    if (recEl && recWrap) {
+      recEl.addEventListener('change', () => {
+        if (recEl.value !== 'none') {
+          recWrap.classList.remove('hidden');
+        } else {
+          recWrap.classList.add('hidden');
+        }
+      });
+    }
+
+    // Natural Language Parser (Pillar 3)
+    let nlpParsed = null;
+    if (titleEl && nlpStrip && nlpSummary) {
+      titleEl.addEventListener('input', () => {
+        const val = titleEl.value.trim();
+        if (val.length > 5 && Toggle.utils && typeof Toggle.utils.parseNLP === 'function') {
+          const res = Toggle.utils.parseNLP(val);
+          if (res && (res.hasDate || res.hasTime || res.location || res.durationMin !== 60)) {
+            nlpParsed = res;
+            nlpSummary.textContent = res.summary;
+            nlpStrip.classList.remove('hidden');
+            return;
+          }
+        }
+        nlpStrip.classList.add('hidden');
+        nlpParsed = null;
+      });
+    }
+
+    if (nlpApplyBtn) {
+      nlpApplyBtn.addEventListener('click', () => {
+        if (!nlpParsed) return;
+        if (titleEl) titleEl.value = nlpParsed.title;
+        if (startEl && nlpParsed.start) startEl.value = nlpParsed.start;
+        if (endEl && nlpParsed.end) endEl.value = nlpParsed.end;
+        const locEl = document.getElementById('eventLocation');
+        if (locEl && nlpParsed.location) locEl.value = nlpParsed.location;
+        if (nlpStrip) nlpStrip.classList.add('hidden');
+        updateOverlapAlerts();
+      });
+    }
 
     if (startEl) {
       startEl.addEventListener('change', () => {

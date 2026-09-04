@@ -24,8 +24,23 @@
   /* ── Event Popover Display ── */
   popover.showEventPopover = function(id, anchor) {
     const events = (Toggle.state && Toggle.state.events) || [];
-    const ev = events.find(e => e.id === id);
-    if (!ev) return;
+    const isOcc = String(id).includes('__occ__');
+    const parentId = isOcc ? String(id).split('__occ__')[0] : id;
+    const parent = events.find(e => e.id === parentId);
+    if (!parent) return;
+
+    let ev = parent;
+    if (isOcc) {
+      const occDateKey = String(id).split('__occ__')[1];
+      const sTime = parent.start.includes('T') ? parent.start.split('T')[1] : '10:00';
+      const eTime = parent.end && parent.end.includes('T') ? parent.end.split('T')[1] : '11:00';
+      ev = {
+        ...parent,
+        id,
+        start: `${occDateKey}T${sTime}`,
+        end: `${occDateKey}T${eTime}`,
+      };
+    }
 
     const pop = document.getElementById('eventPopover');
     if (!pop) return;
@@ -37,7 +52,10 @@
     if (colorBar) colorBar.style.background = color;
 
     const titleEl = document.getElementById('popoverTitle');
-    if (titleEl) titleEl.textContent = ev.title;
+    if (titleEl) {
+      const recBadge = (parent.recurrence && parent.recurrence.freq && parent.recurrence.freq !== 'none') ? ' 🔁' : '';
+      titleEl.textContent = ev.title + recBadge;
+    }
 
     const timeEl = document.getElementById('popoverTime');
     if (timeEl) timeEl.textContent = Toggle.utils.formatDateRange(ev.start, ev.end);
@@ -55,6 +73,8 @@
     pop.style.top  = Math.min(rect.top, window.innerHeight - 280) + 'px';
 
     pop.dataset.currentId = id;
+    pop.dataset.currentStart = ev.start;
+    pop.dataset.currentEnd = ev.end;
   };
 
   popover.hidePopover = function() {
@@ -73,13 +93,42 @@
         const pop = document.getElementById('eventPopover');
         const id = pop?.dataset.currentId;
         if (!id) return;
-        const ev = Toggle.state.events.find(e => e.id === id);
-        if (ev && confirm(`Delete "${ev.title}"?`)) {
-          Toggle.state.events = Toggle.state.events.filter(e => e.id !== id);
-          Toggle.saveEvents();
-          popover.hidePopover();
-          if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
-          popover.showToast('Event deleted');
+
+        const isOcc = String(id).includes('__occ__');
+        const parentId = isOcc ? String(id).split('__occ__')[0] : id;
+        const parent = Toggle.state.events.find(e => e.id === parentId);
+        if (!parent) return;
+
+        const isRecurring = isOcc || (parent.recurrence && parent.recurrence.freq && parent.recurrence.freq !== 'none');
+
+        if (isRecurring) {
+          const occDateKey = isOcc ? String(id).split('__occ__')[1] : parent.start.slice(0, 10);
+          const deleteAll = confirm(`"${parent.title}" is a recurring event.\n\n• Click OK to delete ALL occurrences in this series.\n• Click CANCEL to delete ONLY this single occurrence (${occDateKey}).`);
+
+          if (deleteAll) {
+            Toggle.state.events = Toggle.state.events.filter(e => e.id !== parentId);
+            Toggle.saveEvents();
+            popover.hidePopover();
+            if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
+            popover.showToast('All occurrences deleted');
+          } else {
+            parent.exdates = parent.exdates || [];
+            if (!parent.exdates.includes(occDateKey)) {
+              parent.exdates.push(occDateKey);
+            }
+            Toggle.saveEvents();
+            popover.hidePopover();
+            if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
+            popover.showToast(`Deleted occurrence on ${occDateKey}`);
+          }
+        } else {
+          if (confirm(`Delete "${parent.title}"?`)) {
+            Toggle.state.events = Toggle.state.events.filter(e => e.id !== parentId);
+            Toggle.saveEvents();
+            popover.hidePopover();
+            if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
+            popover.showToast('Event deleted');
+          }
         }
       });
     }
@@ -102,9 +151,12 @@
       popShareWhatsApp.addEventListener('click', () => {
         const pop = document.getElementById('eventPopover');
         const id = pop?.dataset.currentId;
-        const ev = Toggle.state.events.find(e => e.id === id);
+        const parentId = String(id).includes('__occ__') ? String(id).split('__occ__')[0] : id;
+        const ev = Toggle.state.events.find(e => e.id === parentId);
         if (!ev) return;
-        const text = encodeURIComponent(`📅 ${ev.title}\n🕐 ${Toggle.utils.formatDateRange(ev.start, ev.end)}${ev.location ? '\n📍 ' + ev.location : ''}`);
+        const sTime = pop?.dataset.currentStart || ev.start;
+        const eTime = pop?.dataset.currentEnd || ev.end;
+        const text = encodeURIComponent(`📅 *${ev.title}*\n🕐 ${Toggle.utils.formatDateRange(sTime, eTime)}${ev.location ? '\n📍 ' + ev.location : ''}\n\n_Scheduled via Toggle Calendar PK_`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
       });
     }

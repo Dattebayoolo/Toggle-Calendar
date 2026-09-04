@@ -167,20 +167,20 @@
 
   /* ── Live Pakistan Standard Time (PKT, UTC+5) Clock ── */
   sidebar.startClock = function() {
+    // Formatter is constant — build it once, not on every tick.
+    // (It only displays minute precision, so a 15s cadence is plenty.)
+    const formatter = new Intl.DateTimeFormat('en-PK', {
+      timeZone: 'Asia/Karachi',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
     const tick = () => {
-      const now = new Date();
-      // Format strictly in Asia/Karachi timezone
-      const formatter = new Intl.DateTimeFormat('en-PK', {
-        timeZone: 'Asia/Karachi',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
       const el = document.getElementById('currentTime');
-      if (el) el.textContent = formatter.format(now);
+      if (el) el.textContent = formatter.format(new Date());
     };
     tick();
-    setInterval(tick, 1000); // Live seconds accuracy
+    setInterval(tick, 15000);
   };
 
   /* ── Theme Engine ── */
@@ -201,6 +201,120 @@
   sidebar.updateThemeIcon = function(theme) {
     const el = document.querySelector('#themeToggle .material-icons-round.icon-mode');
     if (el) el.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+  };
+
+  /* ── Ramadan Sehri & Iftar Widget (Pillar 4a) ── */
+  sidebar.renderRamadanWidget = function() {
+    const sec = document.getElementById('ramadanSection');
+    if (!sec) return;
+
+    const state = Toggle.state || {};
+    if (!state.showRamadan) {
+      sec.classList.add('hidden');
+      return;
+    }
+
+    sec.classList.remove('hidden');
+    const city = state.city || 'karachi';
+    const utils = Toggle.utils || {};
+    const timings = utils.getRamadanTimings ? utils.getRamadanTimings(new Date(), city) : { sehri: '04:50', iftar: '18:40', sehriMin: 290, iftarMin: 1120 };
+
+    const sehriEl = document.getElementById('sehriTimeVal');
+    const iftarEl = document.getElementById('iftarTimeVal');
+    const cdEl = document.getElementById('ramadanCountdown');
+
+    if (sehriEl) sehriEl.textContent = timings.sehri;
+    if (iftarEl) iftarEl.textContent = timings.iftar;
+
+    if (cdEl) {
+      const now = new Date();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+
+      if (currentMin < timings.sehriMin) {
+        const diff = timings.sehriMin - currentMin;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        cdEl.textContent = `🌙 Sehri ends in ${h}h ${m}m`;
+        cdEl.className = 'ramadan-countdown countdown-sehri';
+      } else if (currentMin < timings.iftarMin) {
+        const diff = timings.iftarMin - currentMin;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        cdEl.textContent = `🌅 Iftar in ${h}h ${m}m`;
+        cdEl.className = 'ramadan-countdown countdown-fasting';
+      } else {
+        const diff = (24 * 60 - currentMin) + timings.sehriMin;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        cdEl.textContent = `✨ Fast opened! Next Sehri in ${h}h ${m}m`;
+        cdEl.className = 'ramadan-countdown countdown-done';
+      }
+    }
+  };
+
+  /* ── Urdu / English Localization Engine (Pillar 4b) ── */
+  sidebar.applyLanguage = function() {
+    const s = Toggle.state || {};
+    const isUrdu = s.lang === 'ur';
+    const U = Toggle.URDU || {};
+
+    // Urdu mode is purely typographic: swap labels & Arabic font, but NEVER
+    // flip the layout (dir stays ltr everywhere so nothing mirrors).
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.documentElement.setAttribute('lang', isUrdu ? 'ur' : 'en');
+
+    const toggleLabel = document.getElementById('langToggleLabel');
+    if (toggleLabel) toggleLabel.textContent = isUrdu ? 'English' : 'اردو';
+
+    // Sidebar section labels & items (MY CALENDARS / PAKISTAN FEATURES)
+    const sidebarLabels = {
+      myCalendarsLabel: isUrdu ? U.myCalendars : 'MY CALENDARS',
+      pakistanFeaturesLabel: isUrdu ? U.pakistanFeatures : 'PAKISTAN FEATURES',
+      calEventsName: isUrdu ? U.events : 'Events',
+      calPrayerName: isUrdu ? U.prayerTimes : 'Prayer Times',
+      calHolidaysName: isUrdu ? U.holidays : 'Pakistani Holidays',
+      swHijriName: isUrdu ? U.hijriDates : 'Hijri Dates',
+      swPrayerBlocksName: isUrdu ? U.prayerBlocks : 'Prayer Blocks',
+      swJummahName: isUrdu ? U.jummahGuard : 'Jummah Guard',
+      swRamadanName: isUrdu ? U.ramadanMode : 'Ramadan Mode',
+      swLoadShedName: isUrdu ? U.loadShedding : 'Load Shedding',
+    };
+    Object.entries(sidebarLabels).forEach(([id, text]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    });
+
+    // Update section titles & button texts
+    const prayerSecTitle = document.getElementById('prayerSecTitle');
+    if (prayerSecTitle) prayerSecTitle.textContent = isUrdu ? U.prayerTimes : 'Prayer Times';
+
+    const holidaysSecTitle = document.getElementById('holidaysSecTitle');
+    if (holidaysSecTitle) holidaysSecTitle.textContent = isUrdu ? U.upcomingHolidays : 'Holidays';
+
+    const newEventBtn = document.getElementById('newEventBtn');
+    if (newEventBtn) {
+      const span = newEventBtn.querySelector('span:last-child');
+      if (span) span.textContent = isUrdu ? U.newEvent : 'New event';
+    }
+
+    const todayBtn = document.getElementById('todayBtn');
+    if (todayBtn) todayBtn.textContent = isUrdu ? U.today : 'Today';
+
+    const searchInput = document.getElementById('globalSearchInput');
+    if (searchInput) {
+      searchInput.placeholder = isUrdu ? U.searchPlaceholder : 'Search events, prayers, holidays...';
+    }
+
+    const viewMap = {
+      viewMonth: isUrdu ? U.month : 'Month',
+      viewWeek: isUrdu ? U.week : 'Week',
+      viewDay: isUrdu ? U.day : 'Day',
+      viewAgenda: isUrdu ? U.agenda : 'Agenda',
+    };
+    Object.entries(viewMap).forEach(([id, text]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    });
   };
 
   /* ── Sync UI Controls with State ── */
@@ -224,6 +338,12 @@
     const citySelect = document.getElementById('citySelect');
     if (citySelect && s.city) citySelect.value = s.city;
 
+    const provinceSelect = document.getElementById('provinceSelect');
+    if (provinceSelect && s.province) provinceSelect.value = s.province;
+
+    sidebar.applyLanguage();
+    sidebar.renderRamadanWidget();
+
     // View buttons
     if (s.view) {
       document.querySelectorAll('.chip[data-view]').forEach(b => {
@@ -241,6 +361,8 @@
   // Global aliases
   window.renderPrayer = sidebar.renderPrayer;
   window.renderHolidays = sidebar.renderHolidays;
+  window.renderRamadanWidget = sidebar.renderRamadanWidget;
+  window.applyLanguage = sidebar.applyLanguage;
   window.renderStatusBar = sidebar.renderStatusBar;
   window.renderTopBar = sidebar.renderTopBar;
   window.startClock = sidebar.startClock;

@@ -23,16 +23,18 @@
 
 | | Feature | Description |
 |---|---|---|
-| 🕌 | **Prayer Times** | Built-in times for 7 major cities — Karachi, Lahore, Islamabad, Peshawar, Quetta, Multan & Faisalabad |
-| 🌙 | **Hijri Dates** | Islamic calendar conversion alongside Gregorian dates |
-| 🤲 | **Jummah Protection** | Never double-book Friday prayers — events are blocked around Jummah |
-| 🇵🇰 | **PK Holidays** | Kashmir Day, Pakistan Day, Independence Day, Iqbal Day, Quaid Day & more, built right in |
-| 📅 | **4 Calendar Views** | Day · Week · Month · Agenda — switch instantly with a mini-calendar navigator |
-| 🏷️ | **Event Categories** | Color-coded Work, Personal, Family, Health, Religious & Social events |
-| 💬 | **WhatsApp Reminders** | Share event reminders via WhatsApp deep links |
-| 🌗 | **Light / Dark Mode** | Fully themed UI in both modes |
-| 📲 | **Installable PWA** | Add to home screen, standalone window, offline-ready |
-| 🔒 | **Private by Design** | All events stored locally — no server, no tracking, no accounts |
+| 🕌 | **Prayer Times** | Astronomical solar calculations for 11 Pakistani cities + Azan reminders |
+| 🌙 | **Hijri Dates** | Dual Gregorian & Islamic date sync with Ruet-e-Hilal lunar sighting adjustment |
+| 🤲 | **Jummah Protection** | Real-time meeting conflict warning & auto-shift buffer (12:45–2:30 PM) |
+| 🔁 | **Recurring Events** | Daily, weekly, monthly & yearly repeating events with occurrence management |
+| ✍️ | **Smart NLP Input** | English & Roman Urdu natural language parser ("Meet Tariq kal shaam 5 baje") |
+| 🌙⚡ | **Ramadan & Load Shedding** | Live Sehri/Iftar countdowns & city feeder outage window monitoring |
+| 🇵🇰 | **Provincial Holidays** | Filter holidays by Federal, Sindh, Punjab, KPK, Balochistan & AJK/GB |
+| ↕️ | **Drag & Drop + Resize** | Move events across days or hours, drag vertical bottom handle to resize |
+| 🌐 | **Urdu (اردو) RTL Mode** | Full native right-to-left layout and Urdu language localization |
+| 🔔 | **Reminders & Digest** | Web push notifications, interval reminders & 8:00 AM PKT daily agenda |
+| 📲 | **Installable PWA** | Service Worker offline cache, standalone mobile/desktop install |
+| 💬 | **WhatsApp RSVP Sharing** | Instant one-tap RSVP and meeting detail sharing on WhatsApp |
 
 ## 🛠️ Tech Stack
 
@@ -42,15 +44,16 @@
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=0a0f1a)
 ![localStorage](https://img.shields.io/badge/storage-localStorage-4A154B?style=flat-square&logo=googlechrome&logoColor=white)
+![Service Worker](https://img.shields.io/badge/PWA-Service_Worker-01411C?style=flat-square&logo=pwa&logoColor=white)
 ![Material Icons](https://img.shields.io/badge/Material_Icons-Round-01411C?style=flat-square&logo=materialdesignicons&logoColor=white)
 
-**Plus Jakarta Sans · Outfit · Noto Naskh Arabic** — no frameworks, no build step, zero dependencies.
+**Plus Jakarta Sans · Outfit · Noto Naskh Arabic** — 100% client-side, zero build step, zero external dependencies.
 
 </div>
 
 ## 🚀 Getting Started
 
-Toggle Calendar is a pure static app — clone and open. That's it.
+Toggle Calendar is a pure client-side web application — clone and open:
 
 ```bash
 # 1. Clone the repository
@@ -63,42 +66,45 @@ open index.html         # macOS
 xdg-open index.html     # Linux
 ```
 
-> 💡 **For the full PWA experience** (install prompt, standalone mode), serve over HTTP:
+> 💡 **For the full PWA experience** (Service Worker caching, desktop/mobile install prompt):
 >
 > ```bash
 > npx serve .          # or: python -m http.server 8080
 > ```
 
-Then open `http://localhost:3000` (or `:8080`) and hit **Install** in your browser.
+Then open `http://localhost:3000` (or `:8080`) and click **Install** in the topbar.
 
 ## 📂 Project Structure
 
 ```
 Toggle-Calendar/
-├── 📄 index.html          # App shell & markup
-├── 🎨 style.css           # Full theming system (light/dark)
-├── ⚙️  app.js              # Legacy bundle (constants, state, utils, views)
-├── 📦 js/                 # Modular source
-│   ├── constants.js       # Holidays, prayer times, category colors
+├── 📄 index.html          # App shell, PWA meta tags & modals
+├── 🎨 style.css           # Modern design system, light/dark themes, RTL & drag styles
+├── 📱 manifest.json       # Web App Manifest for mobile & desktop installation
+├── ⚙️  sw.js               # Service Worker with cache-first offline support
+├── 🖼️  icons/             # PWA app icons (192px, 512px, vector badge)
+├── 📦 js/                 # Modular source architecture
+│   ├── constants.js       # Provincial holidays, city coordinates, Urdu dictionary
 │   ├── state.js           # Single source of truth + localStorage persistence
-│   ├── listeners.js       # Event wiring
-│   ├── main.js            # Boot sequence
+│   ├── utils.js           # NLP parser, astronomical prayer engine, Ramadan & RRULE
+│   ├── listeners.js       # PWA prompt, notifications scheduler, keyboard shortcuts
+│   ├── main.js            # Boot sequence & demo data seeding
 │   ├── render.js          # Render orchestrator
-│   ├── utils.jsX          # Date & Hijri helpers
 │   ├── views/             # monthView · weekView · dayView · agendaView · miniCal
-│   └── components/        # modal · popover · sidebar
-├── 🖼️  assets/             # Banner & graphics
-└── 📱 manifest.json       # PWA manifest (installable, shortcuts)
+│   └── components/        # modal (NLP/recurrence) · popover · sidebar (Ramadan/holidays)
+└── 🖼️  assets/             # Brand banner & graphics
 ```
 
-## 🗺️ Roadmap
+## 🗺️ Completed in V0.2
 
-- [ ] Live prayer times via calculation API (per-location, auto-updating)
-- [ ] Offline-first caching with a service worker
-- [ ] Cloud sync (optional, opt-in)
-- [ ] Drag & drop event rescheduling
-- [ ] Urdu / RTL interface support
-- [ ] Ramadan & Islamic event calendar overlay
+- [x] PWA offline caching with Service Worker (`sw.js`) & manifest
+- [x] Recurring events engine (Daily, Weekly, Monthly, Yearly + `RRULE` ICS export)
+- [x] English & Roman Urdu natural language event parser (NLP) with auto-fill
+- [x] Ramadan mode: Sehri & Iftar calculations, live countdowns & calendar overlays
+- [x] Urdu language toggle (اردو) with native RTL layout
+- [x] Provincial holiday selector (Federal, Sindh, Punjab, KPK, Balochistan, AJK/GB)
+- [x] Pointer-event drag & drop across days/hours + vertical resize duration handle
+- [x] Web Notifications & reminders scheduler (5m, 15m, 30m, 60m + 8:00 AM PKT digest)
 
 ## 🤝 Contributing
 

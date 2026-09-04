@@ -30,9 +30,12 @@
       (ev.category && ev.category.toLowerCase().includes(q))
     );
 
-    return `<div class="week-event-block cat-${ev.category} ${isMatched ? 'search-matched' : ''}" style="top:${top}px;height:${height}px;--ev-color:${color};background:${color}" data-id="${ev.id}" title="${ev.title}${ev.location ? ' · ' + ev.location : ''}">
-      <div class="week-event-title">${ev.title}</div>
+    const recIcon = (ev.recurrence && ev.recurrence.freq && ev.recurrence.freq !== 'none') || ev.isOccurrence ? ' 🔁' : '';
+
+    return `<div class="week-event-block cat-${ev.category} ${isMatched ? 'search-matched' : ''}" style="top:${top}px;height:${height}px;--ev-color:${color};background:${color}" data-id="${ev.id}" draggable="true" title="${ev.title}${recIcon}${ev.location ? ' · ' + ev.location : ''}">
+      <div class="week-event-title">${ev.title}${recIcon}</div>
       <div class="week-event-time">${fmt}</div>
+      <div class="resize-handle" data-id="${ev.id}" title="Drag vertically to change duration"></div>
     </div>`;
   };
 
@@ -51,9 +54,30 @@
     }).join('');
   };
 
+  views.buildRamadanSehriIftarBlocks = function(date) {
+    if (!Toggle.state || !Toggle.state.showRamadan) return '';
+    const city = Toggle.state.city || 'karachi';
+    const utils = Toggle.utils || {};
+    const timings = utils.getRamadanTimings ? utils.getRamadanTimings(date, city) : null;
+    if (!timings) return '';
+
+    const PX_PER_MIN = 52 / 60;
+    const sehriTop = timings.sehriMin * PX_PER_MIN;
+    const iftarTop = timings.iftarMin * PX_PER_MIN;
+
+    return `
+      <div class="ramadan-overlay-block sehri-block" style="top:${sehriTop}px;height:20px" title="🌙 Sehri Ends at ${timings.sehri}">
+        <span>🌙 Sehri ${timings.sehri}</span>
+      </div>
+      <div class="ramadan-overlay-block iftar-block" style="top:${iftarTop}px;height:20px" title="🌅 Iftar Time at ${timings.iftar}">
+        <span>🌅 Iftar ${timings.iftar}</span>
+      </div>
+    `;
+  };
+
   views.buildLoadSheddingBlocks = function(date) {
     if (!Toggle.state || !Toggle.state.showLoadShedding) return '';
-    if (date.getDay() === 0) return ''; // Usually no scheduled load shedding on Sunday
+    if (date.getDay() === 0) return '';
     const city = Toggle.state.city || 'karachi';
     const schedules = Toggle.LOAD_SHEDDING_SCHEDULES || {};
     const slots = schedules[city] || schedules.karachi || [];
@@ -74,7 +98,6 @@
 
   views.buildRamadanBlocks = function(date) {
     if (!Toggle.state || !Toggle.state.showRamadan) return '';
-    // Ramadan working hours 8:00 AM (480 min) – 2:00 PM (840 min)
     const PX_PER_MIN = 52 / 60;
     const top = 480 * PX_PER_MIN;
     const height = 360 * PX_PER_MIN;
@@ -102,7 +125,7 @@
     const header = document.getElementById('weekHeader');
     if (header) {
       header.style.gridTemplateColumns = `64px repeat(7, 1fr)`;
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayNames = state.lang === 'ur' && Toggle.URDU ? Toggle.URDU.weekdays : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       header.innerHTML = `<div class="week-header-cell"></div>` + days.map((d, i) => {
         const isToday = utils.sameDay && utils.sameDay(d, today);
         const hijri = state.showHijri && utils.hijriDateStr ? `<div style="font-size:0.64rem;color:var(--t3);margin-top:2px">${utils.hijriDateStr(d)}</div>` : '';
@@ -128,15 +151,15 @@
       const now = new Date();
       const PX_PER_MIN = 52 / 60;
 
-      cols.innerHTML = days.map(d => {
+      cols.innerHTML = days.map((d, dayIdx) => {
         const isToday = utils.sameDay && utils.sameDay(d, today);
         const evs = (utils.getEventsForDay ? utils.getEventsForDay(d) : []).map(ev => views.buildWeekEventBlock(ev)).join('');
         const prayer = views.buildPrayerBlocks(d);
+        const sehriIftar = views.buildRamadanSehriIftarBlocks(d);
         const loadShedding = views.buildLoadSheddingBlocks(d);
         const ramadan = views.buildRamadanBlocks(d);
 
         const isFri = utils.isFriday ? utils.isFriday(d) : d.getDay() === 5;
-        // Jummah buffer 12:45 PM – 2:30 PM (765 min to 870 min)
         const jum = (isFri && state.showJummah)
           ? `<div class="jummah-block-week" style="top:${765 * PX_PER_MIN}px;height:${105 * PX_PER_MIN}px" title="Protected: Friday Jummah Congregation">🕌 Jummah Guard 12:45–2:30 PM</div>`
           : '';
@@ -145,14 +168,14 @@
           ? `<div class="current-time-line" style="top:${(now.getHours() * 60 + now.getMinutes()) * PX_PER_MIN}px"><span class="current-time-dot"></span></div>`
           : '';
 
-        // 24 clickable hour blocks
         const blocks = Array.from({ length: 24 }, (_, h) =>
           `<div class="hour-block" data-hour="${h}" data-date="${d.toISOString()}"></div>`
         ).join('');
 
-        return `<div class="week-col ${isToday ? 'today-col' : ''} ${isFri ? 'friday-col' : ''}">
+        return `<div class="week-col ${isToday ? 'today-col' : ''} ${isFri ? 'friday-col' : ''}" data-day-index="${dayIdx}" data-date="${d.toISOString()}">
           ${blocks}
           ${ramadan}
+          ${sehriIftar}
           ${loadShedding}
           ${prayer}
           ${jum}
@@ -164,10 +187,147 @@
       // Event click -> Popover
       cols.querySelectorAll('.week-event-block').forEach(el => {
         el.addEventListener('click', e => {
+          if (e.target.closest('.resize-handle')) return;
           e.stopPropagation();
           if (Toggle.popover && typeof Toggle.popover.showEventPopover === 'function') {
             Toggle.popover.showEventPopover(el.dataset.id, el);
           }
+        });
+
+        // Drag & Drop: dragstart (Pillar 5)
+        el.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', el.dataset.id);
+          e.dataTransfer.effectAllowed = 'move';
+          el.classList.add('dragging');
+          window.__toggleDraggingId = el.dataset.id;
+        });
+
+        el.addEventListener('dragend', () => {
+          el.classList.remove('dragging');
+          window.__toggleDraggingId = null;
+        });
+      });
+
+      // Drag over and Drop on week-col
+      cols.querySelectorAll('.week-col').forEach(col => {
+        col.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          col.classList.add('drag-over');
+        });
+
+        col.addEventListener('dragleave', () => {
+          col.classList.remove('drag-over');
+        });
+
+        col.addEventListener('drop', e => {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          const id = window.__toggleDraggingId || e.dataTransfer.getData('text/plain');
+          if (!id) return;
+
+          const isOcc = String(id).includes('__occ__');
+          const parentId = isOcc ? String(id).split('__occ__')[0] : id;
+          const ev = Toggle.state.events.find(x => x.id === parentId);
+          if (!ev) return;
+
+          // Compute drop position
+          const colRect = col.getBoundingClientRect();
+          const y = Math.max(0, e.clientY - colRect.top);
+          const totalMin = y / PX_PER_MIN;
+          const snappedMin = Math.max(0, Math.min(1380, Math.round(totalMin / 15) * 15));
+
+          const targetDate = new Date(col.dataset.date);
+          const pad = n => n.toString().padStart(2, '0');
+          const yyyy = targetDate.getFullYear();
+          const mm = pad(targetDate.getMonth() + 1);
+          const dd = pad(targetDate.getDate());
+
+          const startH = Math.floor(snappedMin / 60);
+          const startM = snappedMin % 60;
+          const newStart = `${yyyy}-${mm}-${dd}T${pad(startH)}:${pad(startM)}`;
+
+          // Preserve original duration
+          const oldStart = new Date(ev.start);
+          const oldEnd = ev.end ? new Date(ev.end) : new Date(oldStart.getTime() + 3600000);
+          const durMs = Math.max(oldEnd.getTime() - oldStart.getTime(), 15 * 60000);
+          const newEndDt = new Date(new Date(newStart).getTime() + durMs);
+          const newEnd = `${newEndDt.getFullYear()}-${pad(newEndDt.getMonth() + 1)}-${pad(newEndDt.getDate())}T${pad(newEndDt.getHours())}:${pad(newEndDt.getMinutes())}`;
+
+          if (isOcc) {
+            const occDateKey = String(id).split('__occ__')[1];
+            const moveAll = confirm('This is a repeating event.\n\nClick OK to shift ALL future occurrences to this new time.\nClick Cancel to move ONLY this single occurrence.');
+            if (moveAll) {
+              ev.start = newStart;
+              ev.end = newEnd;
+            } else {
+              ev.exdates = ev.exdates || [];
+              if (!ev.exdates.includes(occDateKey)) ev.exdates.push(occDateKey);
+              Toggle.state.events.push({
+                ...ev,
+                id: Toggle.getEventId(),
+                start: newStart,
+                end: newEnd,
+                recurrence: null,
+                exdates: [],
+              });
+            }
+          } else {
+            ev.start = newStart;
+            ev.end = newEnd;
+          }
+
+          Toggle.saveEvents();
+          views.renderWeekView();
+          if (Toggle.popover && typeof Toggle.popover.showToast === 'function') {
+            const timeStr = `${startH % 12 || 12}:${pad(startM)} ${startH >= 12 ? 'PM' : 'AM'}`;
+            Toggle.popover.showToast(`Rescheduled to ${timeStr}`);
+          }
+        });
+      });
+
+      // Vertical Resize Handle (Pillar 5)
+      cols.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.addEventListener('mousedown', e => {
+          e.stopPropagation();
+          e.preventDefault();
+          const id = handle.dataset.id;
+          const parentId = String(id).includes('__occ__') ? String(id).split('__occ__')[0] : id;
+          const ev = Toggle.state.events.find(x => x.id === parentId);
+          if (!ev) return;
+
+          const block = handle.closest('.week-event-block');
+          const startY = e.clientY;
+          const startHeight = parseFloat(block.style.height) || 26;
+
+          function onMouseMove(moveEvent) {
+            const dy = moveEvent.clientY - startY;
+            const newHeight = Math.max(22, startHeight + dy);
+            block.style.height = `${newHeight}px`;
+          }
+
+          function onMouseUp(upEvent) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+
+            const dy = upEvent.clientY - startY;
+            const finalHeight = Math.max(22, startHeight + dy);
+            const durMin = Math.max(15, Math.round((finalHeight / PX_PER_MIN) / 15) * 15);
+
+            const sDt = new Date(ev.start);
+            const eDt = new Date(sDt.getTime() + durMin * 60000);
+            const pad = n => n.toString().padStart(2, '0');
+            ev.end = `${eDt.getFullYear()}-${pad(eDt.getMonth() + 1)}-${pad(eDt.getDate())}T${pad(eDt.getHours())}:${pad(eDt.getMinutes())}`;
+
+            Toggle.saveEvents();
+            views.renderWeekView();
+            if (Toggle.popover && typeof Toggle.popover.showToast === 'function') {
+              Toggle.popover.showToast(`Duration: ${durMin} min`);
+            }
+          }
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
         });
       });
 
@@ -189,5 +349,6 @@
   // Global aliases
   window.buildWeekEventBlock = views.buildWeekEventBlock;
   window.buildPrayerBlocks = views.buildPrayerBlocks;
+  window.buildRamadanSehriIftarBlocks = views.buildRamadanSehriIftarBlocks;
   window.renderWeekView = views.renderWeekView;
 })(window);

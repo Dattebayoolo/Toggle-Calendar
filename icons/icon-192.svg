@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#021c0e" />
+      <stop offset="50%" stop-color="#01411c" />
+      <stop offset="100%" stop-color="#065f2c" />
+    </linearGradient>
+    <linearGradient id="metalRing" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cbd5e1"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="24" y="32" width="144" height="136" rx="28" />
+    </clipPath>
+  </defs>
+
+  <!-- Background Base with Squircle -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad)" />
+  <rect width="190" height="190" x="1" y="1" rx="41" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+
+  <!-- Calendar Card with Drop Shadow -->
+  <g filter="url(#shadow)">
+    <!-- Binder Rings -->
+    <rect x="58" y="24" width="10" height="18" rx="5" fill="url(#metalRing)"/>
+    <rect x="124" y="24" width="10" height="18" rx="5" fill="url(#metalRing)"/>
+
+    <!-- Main Card Body -->
+    <g clip-path="url(#cardClip)">
+      <!-- Pakistani Flag Layout inside Card -->
+      <!-- White vertical stripe (Left 25%) -->
+      <rect x="24" y="32" width="36" height="136" fill="#ffffff"/>
+      <!-- Pakistani Dark Green field (Right 75%) -->
+      <rect x="60" y="32" width="108" height="136" fill="#01411c"/>
+
+      <!-- Top Header Accent Bar -->
+      <rect x="24" y="32" width="144" height="28" fill="rgba(0,0,0,0.18)"/>
+
+      <!-- Crescent Moon (Hilal) tilted at 45 degrees -->
+      <g transform="translate(114, 102)">
+        <path d="M 0 -28 A 28 28 0 1 0 28 12 A 22 22 0 1 1 -5 -27 Z" fill="#ffffff"/>
+        <!-- 5-Pointed Star (Sitara) -->
+        <g transform="translate(13, -12) rotate(-35)">
+          <polygon points="0,-9 2.7,-2.8 9.3,-2.8 4,1.1 6,7.5 0,3.6 -6,7.5 -4,1.1 -9.3,-2.8 -2.7,-2.8" fill="#ffffff"/>
+        </g>
+      </g>
+
+      <!-- Toggle Switch Pill Emblem at bottom -->
+      <rect x="74" y="142" width="44" height="16" rx="8" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>
+      <circle cx="106" cy="150" r="6" fill="#ffffff"/>
+      <path d="M 82 150 L 92 150" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

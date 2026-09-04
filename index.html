@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toggle Calendar – Pakistan's Smart Calendar</title>
   <meta name="description" content="Toggle Calendar is Pakistan's first culturally-aware scheduling platform with Hijri dates, prayer times, Jummah protection, and WhatsApp reminders." />
+  <meta name="theme-color" content="#01411c" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect x='2' y='4' width='32' height='29' rx='7' fill='%2301411C'/%3E%3Crect x='2' y='4' width='8' height='29' fill='%23ffffff'/%3E%3Ccircle cx='21' cy='18' r='5.8' fill='%23ffffff'/%3E%3Ccircle cx='23.2' cy='16.2' r='5' fill='%2301411C'/%3E%3Cpolygon points='23.8,12 24.3,13.6 26,13.6 24.6,14.6 25.1,16.2 23.8,15.2 22.5,16.2 23,14.6 21.6,13.6 23.3,13.6' fill='%23ffffff'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
 </head>
 <body>
 
@@ -100,30 +103,30 @@
 
     <!-- Left Nav Items -->
     <nav class="left-nav">
-      <div class="nav-section-label">MY CALENDARS</div>
+      <div class="nav-section-label" id="myCalendarsLabel">MY CALENDARS</div>
 
       <label class="cal-item" for="toggleCalEvents">
         <input type="checkbox" id="toggleCalEvents" class="cal-checkbox-input" checked />
         <span class="cal-check" style="--cal-color:#2563eb"></span>
-        <span class="cal-name">Events</span>
+        <span class="cal-name" id="calEventsName">Events</span>
       </label>
       <label class="cal-item" for="toggleCalPrayer">
         <input type="checkbox" id="toggleCalPrayer" class="cal-checkbox-input" checked />
         <span class="cal-check" style="--cal-color:#059669"></span>
-        <span class="cal-name">Prayer Times</span>
+        <span class="cal-name" id="calPrayerName">Prayer Times</span>
       </label>
       <label class="cal-item" for="toggleCalHolidays">
         <input type="checkbox" id="toggleCalHolidays" class="cal-checkbox-input" checked />
         <span class="cal-check" style="--cal-color:#d97706"></span>
-        <span class="cal-name">Pakistani Holidays</span>
+        <span class="cal-name" id="calHolidaysName">Pakistani Holidays</span>
       </label>
 
-      <div class="nav-section-label" style="margin-top:8px">PAKISTAN FEATURES</div>
+      <div class="nav-section-label" style="margin-top:8px" id="pakistanFeaturesLabel">PAKISTAN FEATURES</div>
 
       <div class="toggle-row">
         <span class="toggle-row-icon material-icons-round">nights_stay</span>
         <div class="toggle-row-text">
-          <span class="toggle-row-label">Hijri Dates</span>
+          <span class="toggle-row-label" id="swHijriName">Hijri Dates</span>
           <span class="toggle-row-sub">Dual Gregorian & Islamic</span>
         </div>
         <label class="goog-switch">
@@ -135,7 +138,7 @@
       <div class="toggle-row">
         <span class="toggle-row-icon material-icons-round">mosque</span>
         <div class="toggle-row-text">
-          <span class="toggle-row-label">Prayer Blocks</span>
+          <span class="toggle-row-label" id="swPrayerBlocksName">Prayer Blocks</span>
           <span class="toggle-row-sub">Show Salah windows</span>
         </div>
         <label class="goog-switch">
@@ -147,7 +150,7 @@
       <div class="toggle-row">
         <span class="toggle-row-icon material-icons-round">block</span>
         <div class="toggle-row-text">
-          <span class="toggle-row-label">Jummah Guard</span>
+          <span class="toggle-row-label" id="swJummahName">Jummah Guard</span>
           <span class="toggle-row-sub">Block Fri 12:45–2:30 PM</span>
         </div>
         <label class="goog-switch">
@@ -159,7 +162,7 @@
       <div class="toggle-row">
         <span class="toggle-row-icon material-icons-round">wb_sunny</span>
         <div class="toggle-row-text">
-          <span class="toggle-row-label">Ramadan Mode</span>
+          <span class="toggle-row-label" id="swRamadanName">Ramadan Mode</span>
           <span class="toggle-row-sub">Shift hours 8 AM – 2 PM</span>
         </div>
         <label class="goog-switch">
@@ -171,7 +174,7 @@
       <div class="toggle-row">
         <span class="toggle-row-icon material-icons-round">flash_off</span>
         <div class="toggle-row-text">
-          <span class="toggle-row-label">Load Shedding</span>
+          <span class="toggle-row-label" id="swLoadShedName">Load Shedding</span>
           <span class="toggle-row-sub">Mark outage windows</span>
         </div>
         <label class="goog-switch">
@@ -181,11 +184,31 @@
       </div>
     </nav>
 
+    <!-- Ramadan Timings Widget (active when Ramadan Mode is on) -->
+    <div class="sidebar-section ramadan-section hidden" id="ramadanSection">
+      <div class="sidebar-section-header">
+        <span class="material-icons-round" style="color:var(--amber);">wb_sunny</span>
+        <span>Ramadan Timings</span>
+        <span class="ramadan-badge-fast">Roza</span>
+      </div>
+      <div class="ramadan-timings-card" id="ramadanTimingsCard">
+        <div class="ramadan-timing-row">
+          <div class="ramadan-time-label">🌙 Sehri Ends:</div>
+          <div class="ramadan-time-val" id="sehriTimeVal">--:--</div>
+        </div>
+        <div class="ramadan-timing-row">
+          <div class="ramadan-time-label">🌅 Iftar Time:</div>
+          <div class="ramadan-time-val" id="iftarTimeVal">--:--</div>
+        </div>
+        <div class="ramadan-countdown" id="ramadanCountdown">Calculating countdown...</div>
+      </div>
+    </div>
+
     <!-- Prayer Times -->
     <div class="sidebar-section">
       <div class="sidebar-section-header">
         <span class="material-icons-round">schedule</span>
-        Prayer Times
+        <span class="sec-title-text" id="prayerSecTitle">Prayer Times</span>
         <select class="city-select-sm" id="citySelect">
           <option value="karachi">Karachi</option>
           <option value="lahore">Lahore</option>
@@ -203,7 +226,16 @@
     <div class="sidebar-section">
       <div class="sidebar-section-header">
         <span class="material-icons-round">flag</span>
-        Upcoming Holidays
+        <span class="sec-title-text" id="holidaysSecTitle">Holidays</span>
+        <select class="city-select-sm" id="provinceSelect" title="Filter by Province">
+          <option value="all">All PK</option>
+          <option value="federal">Federal</option>
+          <option value="punjab">Punjab</option>
+          <option value="sindh">Sindh</option>
+          <option value="kpk">KPK</option>
+          <option value="balochistan">Balochistan</option>
+          <option value="ajk_gb">AJK / GB</option>
+        </select>
       </div>
       <div class="holiday-list" id="holidayList"></div>
     </div>
@@ -211,11 +243,16 @@
   </aside>
 
   <!-- ══ MAIN ══ -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
   <main class="main-content" id="mainContent">
 
     <!-- Top Navigation Bar -->
     <header class="topbar">
       <div class="topbar-left">
+        <!-- Mobile sidebar toggle (visible <= 960px) -->
+        <button class="menu-btn topbar-menu-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span class="material-icons-round">menu</span>
+        </button>
         <!-- Month/Year Navigation -->
         <div class="month-nav">
           <button class="icon-btn" id="prevMonth" aria-label="Previous">
@@ -263,6 +300,18 @@
           <button class="chip" id="viewAgenda" data-view="agenda">Agenda</button>
         </div>
 
+        <!-- Language Toggle -->
+        <button class="chip lang-chip" id="langToggle" title="Switch Language (اردو / English)">
+          <span class="material-icons-round" style="font-size:15px">translate</span>
+          <span id="langToggleLabel">اردو</span>
+        </button>
+
+        <!-- Install App Button (PWA) -->
+        <button class="chip install-app-chip hidden" id="installAppBtn" title="Install Toggle Calendar App">
+          <span class="material-icons-round" style="font-size:16px;">install_mobile</span>
+          <span>Install</span>
+        </button>
+
         <!-- Export .ics -->
         <button class="icon-btn" id="exportIcsBtn" title="Export Calendar (.ics)" aria-label="Export to .ics">
           <span class="material-icons-round">file_download</span>
@@ -272,8 +321,8 @@
         <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
           <span class="material-icons-round icon-mode">light_mode</span>
         </button>
-        <button class="icon-btn" aria-label="Settings">
-          <span class="material-icons-round">settings</span>
+        <button class="icon-btn" id="notifBellBtn" title="Enable Notifications" aria-label="Notifications">
+          <span class="material-icons-round" id="notifBellIcon">notifications_none</span>
         </button>
         <div class="avatar" title="Your account">K</div>
       </div>
@@ -335,7 +384,14 @@
       </div>
 
       <form class="modal-form" id="eventForm">
-        <input type="text" id="eventTitle" class="event-title-input" placeholder="Add title" autocomplete="off" required />
+        <input type="text" id="eventTitle" class="event-title-input" placeholder="Add title or type 'Meet Tariq tomorrow 3pm for 1hr at Dolmen Mall'..." autocomplete="off" required />
+
+        <!-- NLP Suggestion Strip -->
+        <div class="nlp-strip hidden" id="nlpStrip">
+          <span class="material-icons-round nlp-sparkle">auto_awesome</span>
+          <span class="nlp-summary" id="nlpSummary"></span>
+          <button type="button" class="nlp-apply-btn" id="nlpApplyBtn">Auto-fill</button>
+        </div>
 
         <div class="modal-section">
           <span class="material-icons-round modal-field-icon">schedule</span>
@@ -344,6 +400,26 @@
               <input type="datetime-local" id="eventStart" class="dt-input" />
               <span class="dt-sep">–</span>
               <input type="datetime-local" id="eventEnd" class="dt-input" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Recurrence (Pillar 2) -->
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">repeat</span>
+          <div class="modal-field-group">
+            <div class="recurrence-row">
+              <select id="eventRecurrence" class="modal-select">
+                <option value="none">Does not repeat</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <div class="recurrence-until-wrap hidden" id="recurrenceUntilWrap">
+                <span class="dt-sep">until</span>
+                <input type="date" id="eventUntil" class="dt-input" title="Repeat until date" />
+              </div>
             </div>
           </div>
         </div>
@@ -375,9 +451,22 @@
           <input type="text" id="eventAttendees" class="modal-text-input" placeholder="Add attendees (phone or email)" />
         </div>
 
+        <!-- Reminders (Pillar 6) -->
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">notifications_active</span>
+          <select id="eventReminder" class="modal-select">
+            <option value="none">No reminder</option>
+            <option value="5">5 minutes before</option>
+            <option value="15" selected>15 minutes before</option>
+            <option value="30">30 minutes before</option>
+            <option value="60">1 hour before</option>
+            <option value="1440">1 day before</option>
+          </select>
+        </div>
+
         <!-- Notify via -->
         <div class="modal-section notify-section">
-          <span class="material-icons-round modal-field-icon">notifications</span>
+          <span class="material-icons-round modal-field-icon">send</span>
           <div class="notify-chips">
             <label class="notify-chip">
               <input type="checkbox" name="notifMethod" value="whatsapp" checked>

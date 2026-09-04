@@ -4,12 +4,15 @@
  * Caches all core app assets on install, serves from cache on fetch.
  */
 
-const CACHE_NAME = 'toggle-cal-v0.2';
+const CACHE_NAME = 'toggle-cal-v0.2.1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './style.css',
   './manifest.json',
+  './icons/icon-192.svg',
+  './icons/icon-512.svg',
+  './icons/icon.svg',
   './js/constants.js',
   './js/state.js',
   './js/utils.js',
@@ -46,9 +49,29 @@ self.addEventListener('activate', event => {
 
 /* ── Fetch: cache-first, network fallback ── */
 self.addEventListener('fetch', event => {
-  // Skip non-GET and cross-origin (Google Fonts etc) — let them go to network
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+
+  // Google Fonts (CSS + woff2): stale-while-revalidate so the app works
+  // offline after first load instead of falling back to system fonts.
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache =>
+        cache.match(event.request).then(cached => {
+          const network = fetch(event.request).then(response => {
+            if (response && response.status === 200) {
+              cache.put(event.request, response.clone());
+            }
+            return response;
+          }).catch(() => cached);
+          return cached || network;
+        })
+      )
+    );
+    return;
+  }
+
+  // Same-origin only for the cache-first strategy
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
@@ -77,8 +100,8 @@ self.addEventListener('push', event => {
   const data = event.data.json();
   const options = {
     body: data.body || '',
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
+    icon: './icons/icon-192.svg',
+    badge: './icons/icon-192.svg',
     tag: data.tag || 'toggle-cal',
     data: { url: data.url || './' },
     vibrate: [200, 100, 200],

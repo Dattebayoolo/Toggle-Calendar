@@ -132,6 +132,24 @@
     });
   };
 
+  /* ── Prayer time memoization ──
+     calcPrayerTimes is full trig astronomy and gets called many times per
+     render (per week-view day, sidebar, next-prayer countdown, 30s tick).
+     Results depend only on (date, city), so cache them. */
+  const _prayerCache = new Map();
+  const _calcPrayerTimesRaw = utils.calcPrayerTimes;
+  utils.calcPrayerTimes = function(date, cityKey) {
+    const d = (date instanceof Date) ? date : new Date(date);
+    if (isNaN(d.getTime())) return _calcPrayerTimesRaw(date, cityKey);
+    const pad = n => n.toString().padStart(2, '0');
+    const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}|${cityKey || 'karachi'}`;
+    if (_prayerCache.has(key)) return _prayerCache.get(key);
+    const result = _calcPrayerTimesRaw(d, cityKey);
+    if (_prayerCache.size > 400) _prayerCache.clear();
+    _prayerCache.set(key, result);
+    return result;
+  };
+
   /**
    * Helper to return array of prayer strings: ['Fajr 05:04', 'Dhuhr 12:14', ...]
    * Omits auxiliary (Sunrise) for calendar block lists.
@@ -222,26 +240,222 @@
     return `${h.fullMonthName} ${h.year} AH`;
   };
 
+  /**
+   * Ramadan Timings (Pillar 4a): Computes Sehri end (Fajr - 10 min) and Iftar (Maghrib).
+   */
+  utils.getRamadanTimings = function(date, cityKey) {
+    const d = date || new Date();
+    const prayers = utils.calcPrayerTimes(d, cityKey);
+    const fajr = prayers.find(p => p.name === 'Fajr');
+    const maghrib = prayers.find(p => p.name === 'Maghrib');
+    if (!fajr || !maghrib) return { sehri: '04:50', iftar: '18:40', sehriMin: 290, iftarMin: 1120 };
+
+    let sehriMin = fajr.totalMin - 10;
+    if (sehriMin < 0) sehriMin += 24 * 60;
+    const sH = Math.floor(sehriMin / 60);
+    const sM = sehriMin % 60;
+    const sehri = `${sH.toString().padStart(2, '0')}:${sM.toString().padStart(2, '0')}`;
+
+    return {
+      sehri,
+      iftar: maghrib.raw,
+      sehriMin,
+      iftarMin: maghrib.totalMin,
+      fajrRaw: fajr.raw,
+      maghribRaw: maghrib.raw,
+    };
+  };
+
+  /**
+   * Natural Language Parser (Pillar 3): English & Roman Urdu parser for event inputs.
+   */
+  utils.parseNLP = function(rawText) {
+    if (!rawText || !rawText.trim()) return null;
+    const text = rawText.trim();
+    let cleanTitle = text;
+    let targetDate = new Date();
+    let startHour = 10;
+    let startMin = 0;
+    let durationMin = 60;
+    let location = '';
+    let hasDate = false;
+    let hasTime = false;
+
+    // 1. Duration ("for 1 hour", "for 2 hrs", "for 30 min", "1 ghanta", "2 ghante", "aadha ghanta")
+    const durMatch = cleanTitle.match(/\bfor\s+(\d+(?:\.\d+)?)\s*(hours?|hrs?|h)\b/i);
+    if (durMatch) {
+      durationMin = Math.round(parseFloat(durMatch[1]) * 60);
+      cleanTitle = cleanTitle.replace(durMatch[0], '');
+    } else {
+      const durMinMatch = cleanTitle.match(/\bfor\s+(\d+)\s*(mins?|minutes?|m)\b/i);
+      if (durMinMatch) {
+        durationMin = parseInt(durMinMatch[1], 10);
+        cleanTitle = cleanTitle.replace(durMinMatch[0], '');
+      } else {
+        const ghanteMatch = cleanTitle.match(/\b(\d+)\s*(ghante?|ghanta)\b/i);
+        if (ghanteMatch) {
+          durationMin = parseInt(ghanteMatch[1], 10) * 60;
+          cleanTitle = cleanTitle.replace(ghanteMatch[0], '');
+        } else if (/\baadha\s*ghanta\b/i.test(cleanTitle) || /\bhalf\s*an\s*hour\b/i.test(cleanTitle)) {
+          durationMin = 30;
+          cleanTitle = cleanTitle.replace(/\b(aadha\s*ghanta|half\s*an\s*hour)\b/i, '');
+        }
+      }
+    }
+
+    // 2. Date ("today"/"aaj", "tomorrow"/"kal", "parson"/"day after tomorrow", weekday names)
+    if (/\b(today|aaj)\b/i.test(cleanTitle)) {
+      targetDate = new Date();
+      hasDate = true;
+      cleanTitle = cleanTitle.replace(/\b(today|aaj)\b/i, '');
+    } else if (/\b(tomorrow|kal)\b/i.test(cleanTitle)) {
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + 1);
+      hasDate = true;
+      cleanTitle = cleanTitle.replace(/\b(tomorrow|kal)\b/i, '');
+    } else if (/\b(parson|day\s+after\s+tomorrow)\b/i.test(cleanTitle)) {
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + 2);
+      hasDate = true;
+      cleanTitle = cleanTitle.replace(/\b(parson|day\s+after\s+tomorrow)\b/i, '');
+    } else {
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayMatch = cleanTitle.match(/\b(?:next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+      if (dayMatch) {
+        const targetDay = daysOfWeek.indexOf(dayMatch[1].toLowerCase());
+        const curDay = targetDate.getDay();
+        let diff = targetDay - curDay;
+        if (diff <= 0) diff += 7;
+        targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + diff);
+        hasDate = true;
+        cleanTitle = cleanTitle.replace(dayMatch[0], '');
+      }
+    }
+
+    // 3. Time ("3pm", "3:30 pm", "4 baje", "shaam 5 baje", "subah 9 baje", "raat 8 baje")
+    let isPMHint = false;
+    let isAMHint = false;
+    if (/\b(shaam|raat)\b/i.test(cleanTitle)) {
+      isPMHint = true;
+      cleanTitle = cleanTitle.replace(/\b(shaam|raat)\b/i, '');
+    } else if (/\b(subah)\b/i.test(cleanTitle)) {
+      isAMHint = true;
+      cleanTitle = cleanTitle.replace(/\b(subah)\b/i, '');
+    } else if (/\b(dopahar)\b/i.test(cleanTitle)) {
+      isPMHint = true;
+      cleanTitle = cleanTitle.replace(/\b(dopahar)\b/i, '');
+    }
+
+    const timeRegex = /\b(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm|baje|bje)?\b/i;
+    const timeMatch = cleanTitle.match(timeRegex);
+    if (timeMatch && (timeMatch[3] || timeMatch[2] || isPMHint || isAMHint || cleanTitle.toLowerCase().includes('at ' + timeMatch[1]))) {
+      let h = parseInt(timeMatch[1], 10);
+      let m = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+      const meridiem = timeMatch[3] ? timeMatch[3].toLowerCase() : '';
+
+      if (meridiem === 'pm') {
+        if (h < 12) h += 12;
+      } else if (meridiem === 'am') {
+        if (h === 12) h = 0;
+      } else if (meridiem === 'baje' || meridiem === 'bje' || !meridiem) {
+        if (isPMHint && h < 12) h += 12;
+        else if (isAMHint && h === 12) h = 0;
+        else if (!isAMHint && h >= 1 && h <= 6) h += 12;
+      }
+      startHour = h;
+      startMin = m;
+      hasTime = true;
+      cleanTitle = cleanTitle.replace(timeMatch[0], '');
+    }
+
+    // 4. Location ("at Dolmen Mall", "in Zoom", "mein NIC Karachi", "me Emporium")
+    const locMatch = cleanTitle.match(/\b(?:at|in|mein|me)\s+([A-Za-z0-9\s&.–'-]+?)(?=(?:\s+(?:for|on|with|kal|aaj|today|tomorrow))|$)/i);
+    if (locMatch) {
+      location = locMatch[1].trim();
+      cleanTitle = cleanTitle.replace(locMatch[0], '');
+    }
+
+    cleanTitle = cleanTitle.replace(/\b(at|on|with)\b/gi, ' ')
+                           .replace(/\s+/g, ' ')
+                           .replace(/^[\s,–-]+|[\s,–-]+$/g, '')
+                           .trim();
+    if (!cleanTitle) cleanTitle = rawText.trim();
+
+    const pad = n => n.toString().padStart(2, '0');
+    const y = targetDate.getFullYear();
+    const mo = pad(targetDate.getMonth() + 1);
+    const d = pad(targetDate.getDate());
+    const startStr = `${y}-${mo}-${d}T${pad(startHour)}:${pad(startMin)}`;
+
+    const endDt = new Date(new Date(startStr).getTime() + durationMin * 60000);
+    const endStr = `${endDt.getFullYear()}-${pad(endDt.getMonth() + 1)}-${pad(endDt.getDate())}T${pad(endDt.getHours())}:${pad(endDt.getMinutes())}`;
+
+    const timeDisplay = `${startHour % 12 || 12}:${pad(startMin)} ${startHour >= 12 ? 'PM' : 'AM'}`;
+    const dateDisplay = targetDate.toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' });
+    const durDisplay = durationMin >= 60 ? `${durationMin / 60}h` : `${durationMin}m`;
+    const summary = `${dateDisplay} at ${timeDisplay} (${durDisplay})${location ? ' · ' + location : ''}`;
+
+    return {
+      title: cleanTitle,
+      start: startStr,
+      end: endStr,
+      location,
+      durationMin,
+      hasDate,
+      hasTime,
+      summary,
+    };
+  };
+
   /* ─────────────────────────────────────────────────────────────────────────────
-     PAKISTANI GAZETTED & LUNAR HOLIDAYS CHECKER
+     PAKISTANI GAZETTED, PROVINCIAL & LUNAR HOLIDAYS CHECKER (Pillar 4d)
   ───────────────────────────────────────────────────────────────────────────── */
   utils.isHoliday = function(date) {
+    const state = Toggle.state || {};
+    const selectedProv = state.province || 'all';
+
     // 1. Fixed Gregorian Federal Holidays
     const m = date.getMonth() + 1;
     const d = date.getDate();
     const holidays = Toggle.PK_HOLIDAYS || [];
-    const fixed = holidays.find(h => h.month === m && h.day === d);
-    if (fixed) return { name: fixed.name, isGazetted: true, type: fixed.type };
+    const fixed = holidays.find(h => {
+      if (h.month !== m || h.day !== d) return false;
+      if (selectedProv === 'all' || selectedProv === 'federal') return true;
+      return h.province === 'federal' || h.province === selectedProv;
+    });
+    if (fixed) return { name: fixed.name, isGazetted: true, type: fixed.type, province: fixed.province };
 
-    // 2. Islamic Lunar Gazetted & Observance Days
+    // 2. Fixed / Solar Provincial Holidays (Pillar 4d)
+    const provHols = Toggle.PROVINCIAL_HOLIDAYS || [];
+    const provFixed = provHols.find(h => {
+      if (!h.month || h.month !== m || h.day !== d) return false;
+      if (selectedProv === 'federal') return false;
+      return selectedProv === 'all' || h.province === selectedProv;
+    });
+    if (provFixed) return { name: provFixed.name, isGazetted: false, type: provFixed.type, province: provFixed.province };
+
+    // 3. Islamic Lunar Gazetted & Observance Days
     const h = utils.toHijri(date);
-    const off = (Toggle.state && Toggle.state.moonOffset) || 0;
+    const off = (state && state.moonOffset) || 0;
     const hDay = h.day + off;
     const hMonth = h.month;
 
     const islamicEvents = Toggle.ISLAMIC_EVENTS || [];
-    const lunar = islamicEvents.find(e => e.hMonth === hMonth && e.hDay === hDay);
-    if (lunar) return { name: lunar.name, isGazetted: lunar.gazetted, type: 'islamic' };
+    const lunar = islamicEvents.find(e => {
+      if (e.hMonth !== hMonth || e.hDay !== hDay) return false;
+      if (selectedProv === 'all' || selectedProv === 'federal') return true;
+      return e.province === 'federal' || e.province === selectedProv;
+    });
+    if (lunar) return { name: lunar.name, isGazetted: lunar.gazetted, type: 'islamic', province: 'federal' };
+
+    // Provincial lunar holidays (e.g. Urs Shah Abdul Latif, Urs Data Ganj Bakhsh)
+    const provLunar = provHols.find(e => {
+      if (!e.hMonth || e.hMonth !== hMonth || e.hDay !== hDay) return false;
+      if (selectedProv === 'federal') return false;
+      return selectedProv === 'all' || e.province === selectedProv;
+    });
+    if (provLunar) return { name: provLunar.name, isGazetted: false, type: 'provincial', province: provLunar.province };
 
     return null;
   };
@@ -292,7 +506,7 @@
   };
 
   /* ─────────────────────────────────────────────────────────────────────────────
-     DATE COMPARISONS & EVENT HELPERS
+     DATE COMPARISONS & EVENT HELPERS (with Recurring Events Expansion - Pillar 2)
   ───────────────────────────────────────────────────────────────────────────── */
   utils.sameDay = function(a, b) {
     if (!a || !b) return false;
@@ -309,9 +523,68 @@
     const state = Toggle.state || {};
     if (state.showEvents === false) return [];
     const events = state.events || [];
-    let list = events.filter(e => {
-      const d = new Date(e.start);
-      return utils.sameDay(d, date);
+    const target = new Date(date);
+    const pad = n => n.toString().padStart(2, '0');
+    const dateKey = `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())}`;
+
+    let list = [];
+
+    events.forEach(e => {
+      if (!e.start) return;
+      const baseStart = new Date(e.start);
+      const baseEnd = e.end ? new Date(e.end) : new Date(baseStart.getTime() + 3600000);
+      const isSame = utils.sameDay(baseStart, target);
+
+      // If exact date matches and not in exdates
+      if (isSame) {
+        if (!e.exdates || !e.exdates.includes(dateKey)) {
+          list.push(e);
+        }
+        return;
+      }
+
+      // Check recurrence expansion (Pillar 2)
+      if (e.recurrence && e.recurrence.freq && e.recurrence.freq !== 'none') {
+        const baseDayStart = new Date(baseStart.getFullYear(), baseStart.getMonth(), baseStart.getDate());
+        const targetDayStart = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+
+        if (targetDayStart >= baseDayStart) {
+          // Check 'until' boundary
+          if (e.recurrence.until) {
+            const untilDate = new Date(e.recurrence.until);
+            untilDate.setHours(23, 59, 59, 999);
+            if (targetDayStart > untilDate) return;
+          }
+
+          // Check if excluded on this occurrence
+          if (e.exdates && e.exdates.includes(dateKey)) return;
+
+          let matchesFreq = false;
+          const freq = e.recurrence.freq;
+
+          if (freq === 'daily') {
+            matchesFreq = true;
+          } else if (freq === 'weekly') {
+            matchesFreq = (target.getDay() === baseStart.getDay());
+          } else if (freq === 'monthly') {
+            matchesFreq = (target.getDate() === baseStart.getDate());
+          } else if (freq === 'yearly') {
+            matchesFreq = (target.getDate() === baseStart.getDate() && target.getMonth() === baseStart.getMonth());
+          }
+
+          if (matchesFreq) {
+            list.push({
+              ...e,
+              id: `${e.id}__occ__${dateKey}`,
+              originalId: e.id,
+              isOccurrence: true,
+              occurrenceDate: dateKey,
+              start: `${dateKey}T${pad(baseStart.getHours())}:${pad(baseStart.getMinutes())}`,
+              end: `${dateKey}T${pad(baseEnd.getHours())}:${pad(baseEnd.getMinutes())}`,
+            });
+          }
+        }
+      }
     });
 
     if (state.searchQuery && state.searchQuery.trim()) {
@@ -325,6 +598,28 @@
       });
     }
     return list;
+  };
+
+  /* ── Per-day event memoization ──
+     The month grid calls this for 42 cells per render, each scanning all
+     events. Cache results, invalidated when events change (version bump in
+     state.saveEvents), when the event filter toggles, or on search changes. */
+  const _eventsDayCache = new Map();
+  const _getEventsForDayRaw = utils.getEventsForDay;
+  utils.getEventsForDay = function(date) {
+    const state = Toggle.state || {};
+    if (state.showEvents === false) return [];
+    const target = (date instanceof Date) ? date : new Date(date);
+    if (isNaN(target.getTime())) return _getEventsForDayRaw(date);
+    const pad = n => n.toString().padStart(2, '0');
+    const dateKey = `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())}`;
+    const q = (state.searchQuery || '').trim().toLowerCase();
+    const key = `${dateKey}|v${Toggle._eventsVersion || 0}|q:${q}`;
+    if (_eventsDayCache.has(key)) return _eventsDayCache.get(key);
+    const result = _getEventsForDayRaw(target);
+    if (_eventsDayCache.size > 300) _eventsDayCache.clear();
+    _eventsDayCache.set(key, result);
+    return result;
   };
 
   utils.dayMatchesSearch = function(date) {
@@ -353,7 +648,7 @@
   };
 
   /* ─────────────────────────────────────────────────────────────────────────────
-     FORMATTING & ICS EXPORT
+     FORMATTING & ICS EXPORT (with RRULE - Pillar 2)
   ───────────────────────────────────────────────────────────────────────────── */
   utils.fmt12 = function(dt) {
     if (!dt) return '';
@@ -421,12 +716,24 @@
     events.forEach(ev => {
       const start = toICSDate(ev.start);
       const end = ev.end ? toICSDate(ev.end) : toICSDate(new Date(new Date(ev.start).getTime() + 3600000));
+      
+      let rrule = '';
+      if (ev.recurrence && ev.recurrence.freq && ev.recurrence.freq !== 'none') {
+        rrule = `RRULE:FREQ=${ev.recurrence.freq.toUpperCase()}`;
+        if (ev.recurrence.until) {
+          const u = new Date(ev.recurrence.until);
+          u.setHours(23, 59, 59, 0);
+          rrule += `;UNTIL=${toICSDate(u)}`;
+        }
+      }
+
       ics.push(
         'BEGIN:VEVENT',
         `UID:${ev.id}@toggle.pk`,
         `DTSTAMP:${toICSDate(new Date())}`,
         `DTSTART:${start}`,
         `DTEND:${end}`,
+        rrule || '',
         `SUMMARY:${(ev.title || 'Event').replace(/,/g, '\\,')}`,
         ev.location ? `LOCATION:${ev.location.replace(/,/g, '\\,')}` : '',
         ev.description ? `DESCRIPTION:${ev.description.replace(/\n/g, '\\n')}` : '',
@@ -459,5 +766,7 @@
   window.calcPrayerTimes = utils.calcPrayerTimes;
   window.getPrayerStrings = utils.getPrayerStrings;
   window.getNextPrayer = utils.getNextPrayer;
+  window.getRamadanTimings = utils.getRamadanTimings;
+  window.parseNLP = utils.parseNLP;
   window.exportToICS = utils.exportToICS;
 })(window);

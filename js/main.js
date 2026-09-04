@@ -23,24 +23,30 @@
     Toggle.state.events = [
       {
         id: Toggle.getEventId(),
-        title: 'Sprint Planning & Standup',
+        title: 'Daily Engineering Standup',
         start: formatDT(0, 10, 0),
-        end:   formatDT(0, 11, 0),
+        end:   formatDT(0, 10, 30),
         category: 'work',
+        recurrence: { freq: 'daily' },
+        reminder: '15',
+        exdates: [],
         location: 'Google Meet',
-        description: 'Q4 Product Roadmap & Sprint Backlog review',
+        description: 'Daily team sync on roadmap deliverables',
         attendees: 'team@toggle.pk',
         notify: ['whatsapp', 'push'],
       },
       {
         id: Toggle.getEventId(),
-        title: 'Client Sync (London / Dubai)',
-        start: formatDT(0, 15, 30),
-        end:   formatDT(0, 16, 30),
+        title: 'Weekly Tech Demo & Retrospective',
+        start: formatDT(1, 16, 0),
+        end:   formatDT(1, 17, 30),
         category: 'work',
-        location: 'Zoom',
-        description: 'Cross-timezone deliverable handoff',
-        attendees: 'ahmed@client.co.uk',
+        recurrence: { freq: 'weekly' },
+        reminder: '30',
+        exdates: [],
+        location: 'Zoom (ID: 849-201-443)',
+        description: 'Feature show & tell + Q4 planning',
+        attendees: 'devs@toggle.pk',
         notify: ['whatsapp'],
       },
       {
@@ -49,8 +55,9 @@
         start: formatDT(1, 11, 30),
         end:   formatDT(1, 12, 30),
         category: 'health',
+        reminder: '60',
         location: 'Aga Khan Hospital, Karachi',
-        description: 'Routine annual health checkup',
+        description: 'Routine health checkup',
         attendees: '',
         notify: ['sms', 'push'],
       },
@@ -60,6 +67,7 @@
         start: formatDT(2, 20, 0),
         end:   formatDT(2, 22, 0),
         category: 'family',
+        reminder: '30',
         location: 'Kolachi Restaurant, Do Darya',
         description: 'Weekend family get-together',
         attendees: 'family-group',
@@ -71,6 +79,7 @@
         start: formatDT(4, 17, 0),
         end:   formatDT(4, 19, 0),
         category: 'social',
+        reminder: '15',
         location: 'NIC Karachi / Habib University',
         description: 'Building modern Pakistani web applications',
         attendees: 'community@dev.pk',
@@ -82,12 +91,28 @@
   };
 
   Toggle.initApp = function() {
+    // Register Service Worker for PWA (Pillar 1)
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.info('Service Worker registration skipped or failed:', err);
+      });
+    }
+
     if (Toggle.sidebar && typeof Toggle.sidebar.initTheme === 'function') Toggle.sidebar.initTheme();
     Toggle.seedDemoEvents();
     if (Toggle.sidebar && typeof Toggle.sidebar.syncControlsWithState === 'function') Toggle.sidebar.syncControlsWithState();
     if (Toggle.listeners && typeof Toggle.listeners.initListeners === 'function') Toggle.listeners.initListeners();
     if (Toggle.sidebar && typeof Toggle.sidebar.startClock === 'function') Toggle.sidebar.startClock();
     if (typeof Toggle.renderAll === 'function') Toggle.renderAll();
+
+    // PWA: register the service worker (offline-first + install prompt).
+    // Only over HTTP(S) — file:// has no service worker support.
+    if ('serviceWorker' in navigator &&
+        (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('[Toggle] Service worker registration failed:', err);
+      });
+    }
   };
 
   if (document.readyState === 'loading') {
