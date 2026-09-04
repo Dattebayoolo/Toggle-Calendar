@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toggle Calendar – Pakistan's Smart Calendar</title>
+  <meta name="description" content="Toggle Calendar is Pakistan's first culturally-aware scheduling platform with Hijri dates, prayer times, Jummah protection, and WhatsApp reminders." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect x='2' y='4' width='32' height='29' rx='7' fill='%2301411C'/%3E%3Crect x='2' y='4' width='8' height='29' fill='%23ffffff'/%3E%3Ccircle cx='21' cy='18' r='5.8' fill='%23ffffff'/%3E%3Ccircle cx='23.2' cy='16.2' r='5' fill='%2301411C'/%3E%3Cpolygon points='23.8,12 24.3,13.6 26,13.6 24.6,14.6 25.1,16.2 23.8,15.2 22.5,16.2 23,14.6 21.6,13.6 23.3,13.6' fill='%23ffffff'/%3E%3C/svg%3E" />
+</head>
+<body>
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Brand Logo -->
+    <div class="sidebar-logo">
+      <button class="menu-btn" id="hamburger" aria-label="Toggle sidebar">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Pakistan Flag Emerald Gradient -->
+              <linearGradient id="pkFlagGreen" x1="8" y1="2" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#057a3e"/>
+                <stop offset="55%" stop-color="#01411c"/>
+                <stop offset="100%" stop-color="#002b12"/>
+              </linearGradient>
+
+              <!-- Calendar Card Shape Clip -->
+              <clipPath id="calCardClip">
+                <rect x="2" y="4" width="32" height="29" rx="7.5"/>
+              </clipPath>
+
+              <!-- Hilal Crescent Mask -->
+              <mask id="pkMoonMask">
+                <rect width="36" height="36" fill="black"/>
+                <circle cx="21" cy="18" r="6.2" fill="white"/>
+                <circle cx="23.3" cy="16.1" r="5.3" fill="black"/>
+              </mask>
+
+              <!-- Metallic Binder Ring Gradient -->
+              <linearGradient id="metalRing" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#94a3b8"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Calendar Spiral Loops -->
+            <rect x="7.8" y="1.2" width="3" height="5.6" rx="1.5" fill="url(#metalRing)"/>
+            <rect x="25.2" y="1.2" width="3" height="5.6" rx="1.5" fill="url(#metalRing)"/>
+
+            <!-- Main Pakistani Flag Calendar Emblem -->
+            <g clip-path="url(#calCardClip)">
+              <!-- Flag Green Field (Right 75%) -->
+              <rect x="2" y="4" width="32" height="29" fill="url(#pkFlagGreen)"/>
+
+              <!-- Flag White Hoist Stripe (Left 25%) -->
+              <rect x="2" y="4" width="8" height="29" fill="#ffffff"/>
+
+              <!-- Hairline Border Between Stripe and Green -->
+              <line x1="10" y1="4" x2="10" y2="33" stroke="rgba(0,0,0,0.12)" stroke-width="0.75"/>
+
+              <!-- Subtle Calendar Header Division -->
+              <line x1="2" y1="10.5" x2="34" y2="10.5" stroke="rgba(255,255,255,0.2)" stroke-width="0.75"/>
+
+              <!-- Crescent Moon (Hilal) -->
+              <circle cx="21" cy="18" r="6.2" fill="#ffffff" mask="url(#pkMoonMask)"/>
+
+              <!-- 5-Pointed Star (Sitara) tilted at 35 degrees -->
+              <g transform="translate(24.2, 14.1) rotate(-35)">
+                <polygon points="0,-2.6 0.75,-0.8 2.5,-0.8 1.1,0.3 1.6,2.1 0,1.1 -1.6,2.1 -1.1,0.3 -2.5,-0.8 -0.75,-0.8" fill="#ffffff"/>
+              </g>
+
+              <!-- "Toggle" Switch Indicator Pill in Lower Portion -->
+              <rect x="15.5" y="25" width="14.5" height="5" rx="2.5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="0.6"/>
+              <circle cx="26" cy="27.5" r="2" fill="#ffffff"/>
+            </g>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">Toggle Calendar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Event FAB (Sidebar) -->
+    <button class="sidebar-fab" id="newEventBtn">
+      <span class="material-icons-round">add</span>
+      <span>New event</span>
+    </button>
+
+    <!-- Mini Calendar -->
+    <div class="mini-cal-wrap" id="miniCalendar"></div>
+
+    <!-- Left Nav Items -->
+    <nav class="left-nav">
+      <div class="nav-section-label">MY CALENDARS</div>
+
+      <label class="cal-item" for="toggleCalEvents">
+        <input type="checkbox" id="toggleCalEvents" class="cal-checkbox-input" checked />
+        <span class="cal-check" style="--cal-color:#2563eb"></span>
+        <span class="cal-name">Events</span>
+      </label>
+      <label class="cal-item" for="toggleCalPrayer">
+        <input type="checkbox" id="toggleCalPrayer" class="cal-checkbox-input" checked />
+        <span class="cal-check" style="--cal-color:#059669"></span>
+        <span class="cal-name">Prayer Times</span>
+      </label>
+      <label class="cal-item" for="toggleCalHolidays">
+        <input type="checkbox" id="toggleCalHolidays" class="cal-checkbox-input" checked />
+        <span class="cal-check" style="--cal-color:#d97706"></span>
+        <span class="cal-name">Pakistani Holidays</span>
+      </label>
+
+      <div class="nav-section-label" style="margin-top:8px">PAKISTAN FEATURES</div>
+
+      <div class="toggle-row">
+        <span class="toggle-row-icon material-icons-round">nights_stay</span>
+        <div class="toggle-row-text">
+          <span class="toggle-row-label">Hijri Dates</span>
+          <span class="toggle-row-sub">Dual Gregorian & Islamic</span>
+        </div>
+        <label class="goog-switch">
+          <input type="checkbox" id="toggleHijri" checked>
+          <span class="goog-track"><span class="goog-thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-row-icon material-icons-round">mosque</span>
+        <div class="toggle-row-text">
+          <span class="toggle-row-label">Prayer Blocks</span>
+          <span class="toggle-row-sub">Show Salah windows</span>
+        </div>
+        <label class="goog-switch">
+          <input type="checkbox" id="togglePrayer" checked>
+          <span class="goog-track"><span class="goog-thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-row-icon material-icons-round">block</span>
+        <div class="toggle-row-text">
+          <span class="toggle-row-label">Jummah Guard</span>
+          <span class="toggle-row-sub">Block Fri 12:45–2:30 PM</span>
+        </div>
+        <label class="goog-switch">
+          <input type="checkbox" id="toggleJummah" checked>
+          <span class="goog-track"><span class="goog-thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-row-icon material-icons-round">wb_sunny</span>
+        <div class="toggle-row-text">
+          <span class="toggle-row-label">Ramadan Mode</span>
+          <span class="toggle-row-sub">Shift hours 8 AM – 2 PM</span>
+        </div>
+        <label class="goog-switch">
+          <input type="checkbox" id="toggleRamadan">
+          <span class="goog-track amber"><span class="goog-thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-row-icon material-icons-round">flash_off</span>
+        <div class="toggle-row-text">
+          <span class="toggle-row-label">Load Shedding</span>
+          <span class="toggle-row-sub">Mark outage windows</span>
+        </div>
+        <label class="goog-switch">
+          <input type="checkbox" id="toggleLoadShedding">
+          <span class="goog-track red"><span class="goog-thumb"></span></span>
+        </label>
+      </div>
+    </nav>
+
+    <!-- Prayer Times -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header">
+        <span class="material-icons-round">schedule</span>
+        Prayer Times
+        <select class="city-select-sm" id="citySelect">
+          <option value="karachi">Karachi</option>
+          <option value="lahore">Lahore</option>
+          <option value="islamabad">Islamabad</option>
+          <option value="peshawar">Peshawar</option>
+          <option value="quetta">Quetta</option>
+          <option value="multan">Multan</option>
+          <option value="faisalabad">Faisalabad</option>
+        </select>
+      </div>
+      <div class="prayer-list" id="prayerList"></div>
+    </div>
+
+    <!-- Upcoming Holidays -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header">
+        <span class="material-icons-round">flag</span>
+        Upcoming Holidays
+      </div>
+      <div class="holiday-list" id="holidayList"></div>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <!-- Month/Year Navigation -->
+        <div class="month-nav">
+          <button class="icon-btn" id="prevMonth" aria-label="Previous">
+            <span class="material-icons-round">chevron_left</span>
+          </button>
+          <div class="month-display">
+            <h1 class="month-title" id="monthTitle">September 2026</h1>
+            <div class="hijri-label" id="hijriSubtitle">12 Rabi al-Awwal 1448</div>
+          </div>
+          <button class="icon-btn" id="nextMonth" aria-label="Next">
+            <span class="material-icons-round">chevron_right</span>
+          </button>
+        </div>
+        <button class="today-chip" id="todayBtn">Today</button>
+      </div>
+
+      <div class="topbar-center">
+        <!-- Search -->
+        <div class="search-bar">
+          <span class="material-icons-round search-icon">search</span>
+          <input type="text" class="search-input" id="globalSearchInput" placeholder="Search events, prayers, holidays..." />
+          <kbd class="search-kbd">⌘K</kbd>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Moon Sighting Adjuster -->
+        <div class="moon-adjuster-wrap" title="Ruet-e-Hilal moon sighting adjustment">
+          <span class="moon-badge-label">
+            <span class="material-icons-round">bedtime</span>
+            <span>Ruet</span>
+          </span>
+          <div class="chip-group" id="moonToggleGroup">
+            <button class="chip active" id="moonAuto">Auto</button>
+            <button class="chip" id="moonMinus">−1d</button>
+            <button class="chip" id="moonPlus">+1d</button>
+          </div>
+        </div>
+
+        <!-- View Switcher -->
+        <div class="chip-group" id="viewSwitcherGroup">
+          <button class="chip active" id="viewMonth" data-view="month">Month</button>
+          <button class="chip" id="viewWeek" data-view="week">Week</button>
+          <button class="chip" id="viewDay" data-view="day">Day</button>
+          <button class="chip" id="viewAgenda" data-view="agenda">Agenda</button>
+        </div>
+
+        <!-- Export .ics -->
+        <button class="icon-btn" id="exportIcsBtn" title="Export Calendar (.ics)" aria-label="Export to .ics">
+          <span class="material-icons-round">file_download</span>
+        </button>
+
+        <!-- Theme + Settings -->
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <span class="material-icons-round icon-mode">light_mode</span>
+        </button>
+        <button class="icon-btn" aria-label="Settings">
+          <span class="material-icons-round">settings</span>
+        </button>
+        <div class="avatar" title="Your account">K</div>
+      </div>
+    </header>
+
+    <!-- Status / Feature Pills Bar -->
+    <div class="feature-bar" id="statusBar">
+      <div class="feature-pills" id="statusIndicators"></div>
+      <div class="clock-chip">
+        <span class="clock-flag">🇵🇰</span>
+        <span id="currentTime" class="clock-time">--:--</span>
+        <span class="clock-tz">PKT</span>
+      </div>
+    </div>
+
+    <!-- Calendar Grid Container -->
+    <div class="calendar-container" id="calendarContainer">
+
+      <!-- Month View -->
+      <div class="month-view" id="monthView">
+        <div class="weekday-headers" id="weekdayHeaders"></div>
+        <div class="days-grid" id="daysGrid"></div>
+      </div>
+
+      <!-- Week View -->
+      <div class="week-view hidden" id="weekView">
+        <div class="week-header" id="weekHeader"></div>
+        <div class="week-body">
+          <div class="time-col" id="timeColumn"></div>
+          <div class="week-cols" id="weekColumns"></div>
+        </div>
+      </div>
+
+      <!-- Day View -->
+      <div class="day-view hidden" id="dayView">
+        <div class="day-header-bar" id="dayHeader"></div>
+        <div class="day-body">
+          <div class="time-col" id="timeColumnDay"></div>
+          <div class="day-col" id="dayColumn"></div>
+        </div>
+      </div>
+
+      <!-- Agenda View -->
+      <div class="agenda-view hidden" id="agendaView">
+        <div class="agenda-list" id="agendaList"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ══ EVENT CREATION MODAL ══ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="event-modal" id="eventModal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Create event</h2>
+        <button class="icon-btn" id="modalClose" aria-label="Close">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+
+      <form class="modal-form" id="eventForm">
+        <input type="text" id="eventTitle" class="event-title-input" placeholder="Add title" autocomplete="off" required />
+
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">schedule</span>
+          <div class="modal-field-group">
+            <div class="date-time-row">
+              <input type="datetime-local" id="eventStart" class="dt-input" />
+              <span class="dt-sep">–</span>
+              <input type="datetime-local" id="eventEnd" class="dt-input" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">category</span>
+          <select id="eventCategory" class="modal-select">
+            <option value="work">Work / Meeting</option>
+            <option value="personal">Personal</option>
+            <option value="family">Family</option>
+            <option value="health">Health / Doctor</option>
+            <option value="religious">Religious</option>
+            <option value="social">Social</option>
+          </select>
+        </div>
+
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">location_on</span>
+          <input type="text" id="eventLocation" class="modal-text-input" placeholder="Add location or video call" />
+        </div>
+
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">notes</span>
+          <textarea id="eventDesc" class="modal-textarea" placeholder="Add notes" rows="2"></textarea>
+        </div>
+
+        <div class="modal-section">
+          <span class="material-icons-round modal-field-icon">group</span>
+          <input type="text" id="eventAttendees" class="modal-text-input" placeholder="Add attendees (phone or email)" />
+        </div>
+
+        <!-- Notify via -->
+        <div class="modal-section notify-section">
+          <span class="material-icons-round modal-field-icon">notifications</span>
+          <div class="notify-chips">
+            <label class="notify-chip">
+              <input type="checkbox" name="notifMethod" value="whatsapp" checked>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a8.993 8.993 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M11.954 0C5.368 0 0 5.373 0 11.965a11.93 11.93 0 0 0 1.598 5.985L0 24l6.186-1.573a11.94 11.94 0 0 0 5.768 1.474C18.562 23.901 24 18.528 24 11.937 24 5.373 18.562 0 11.954 0z"/></svg>
+                WhatsApp
+              </span>
+            </label>
+            <label class="notify-chip">
+              <input type="checkbox" name="notifMethod" value="sms">
+              <span>SMS</span>
+            </label>
+            <label class="notify-chip">
+              <input type="checkbox" name="notifMethod" value="push" checked>
+              <span>Push</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="goog-btn-text" id="cancelEvent">Cancel</button>
+          <button type="submit" class="goog-btn-filled" id="saveEvent">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ EVENT DETAIL POPOVER ══ -->
+  <div class="event-popover hidden" id="eventPopover">
+    <div class="popover-toolbar">
+      <button class="icon-btn sm" id="popEdit"><span class="material-icons-round">edit</span></button>
+      <button class="icon-btn sm" id="popShareWhatsApp" title="Share via WhatsApp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a8.993 8.993 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M11.954 0C5.368 0 0 5.373 0 11.965a11.93 11.93 0 0 0 1.598 5.985L0 24l6.186-1.573a11.94 11.94 0 0 0 5.768 1.474C18.562 23.901 24 18.528 24 11.937 24 5.373 18.562 0 11.954 0z"/></svg>
+      </button>
+      <button class="icon-btn sm" id="popDelete"><span class="material-icons-round">delete</span></button>
+      <button class="icon-btn sm" id="popoverClose"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="popover-body">
+      <div class="popover-color-bar" id="popoverColorBar"></div>
+      <h3 class="popover-title" id="popoverTitle"></h3>
+      <div class="popover-meta" id="popoverTime"></div>
+      <div class="popover-meta" id="popoverLocation"></div>
+      <div class="popover-meta" id="popoverDesc"></div>
+    </div>
+  </div>
+
+  <!-- ══ TOAST CONTAINER ══ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ══ MOBILE FAB ══ -->
+  <button class="mobile-fab" id="fab" aria-label="Create event">
+    <span class="material-icons-round">add</span>
+  </button>
+
+  <!-- ══ MODULAR COMPONENTS (Works on file:/// and http://) ══ -->
+  <script src="js/constants.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components/popover.js"></script>
+  <script src="js/components/modal.js"></script>
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/views/miniCal.js"></script>
+  <script src="js/views/weekView.js"></script>
+  <script src="js/views/monthView.js"></script>
+  <script src="js/views/dayView.js"></script>
+  <script src="js/views/agendaView.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/listeners.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
